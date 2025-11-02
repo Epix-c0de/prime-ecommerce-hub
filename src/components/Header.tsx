@@ -52,10 +52,10 @@ const Header = ({ cartCount, onCartClick }: HeaderProps) => {
                 <Heart className="h-6 w-6" />
                 <span className="text-xs mt-1 hidden md:block">Wishlist</span>
               </button>
-              <button className="flex flex-col items-center hover:text-primary transition-colors">
+              <a href="/auth" className="flex flex-col items-center hover:text-primary transition-colors">
                 <User className="h-6 w-6" />
                 <span className="text-xs mt-1 hidden md:block">Account</span>
-              </button>
+              </a>
               <button 
                 onClick={onCartClick}
                 className="flex flex-col items-center hover:text-primary transition-colors relative"

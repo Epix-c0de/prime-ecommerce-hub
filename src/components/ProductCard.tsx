@@ -1,4 +1,5 @@
 import { ShoppingCart, Star } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -20,13 +21,17 @@ interface ProductCardProps {
 }
 
 const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
+  const navigate = useNavigate();
   const discountPercentage = product.originalPrice
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 0;
 
   return (
     <Card className="group overflow-hidden transition-all hover:-translate-y-1 hover:shadow-lg">
-      <div className="relative overflow-hidden bg-muted">
+      <div 
+        className="relative overflow-hidden bg-muted cursor-pointer"
+        onClick={() => navigate(`/product/${product.id}`)}
+      >
         <img
           src={product.image}
           alt={product.name}
@@ -39,7 +44,12 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
         )}
       </div>
       <div className="p-4">
-        <h3 className="font-medium text-sm mb-2 line-clamp-2 h-10">{product.name}</h3>
+        <h3 
+          className="font-medium text-sm mb-2 line-clamp-2 h-10 cursor-pointer hover:text-primary"
+          onClick={() => navigate(`/product/${product.id}`)}
+        >
+          {product.name}
+        </h3>
         <div className="flex items-center gap-1 mb-2">
           {[...Array(5)].map((_, i) => (
             <Star
