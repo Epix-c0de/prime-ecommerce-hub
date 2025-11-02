@@ -1,12 +1,141 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from "react";
+import Header from "@/components/Header";
+import HeroSlider from "@/components/HeroSlider";
+import CategoryGrid from "@/components/CategoryGrid";
+import FlashSales from "@/components/FlashSales";
+import ProductCard, { Product } from "@/components/ProductCard";
+import Footer from "@/components/Footer";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+import { flashSaleProducts, popularProducts } from "@/lib/productData";
+import { ArrowRight } from "lucide-react";
 
 const Index = () => {
+  const [cartItems, setCartItems] = useState<Product[]>([]);
+
+  const handleAddToCart = (product: Product) => {
+    setCartItems([...cartItems, product]);
+    toast.success("Item added to cart", {
+      description: product.name,
+    });
+  };
+
+  const handleCartClick = () => {
+    toast.info(`You have ${cartItems.length} item(s) in your cart`);
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen flex flex-col">
+      <Header cartCount={cartItems.length} onCartClick={handleCartClick} />
+      
+      <main className="flex-grow">
+        {/* Hero slider */}
+        <section className="bg-card">
+          <div className="container mx-auto px-4 py-4">
+            <HeroSlider />
+          </div>
+        </section>
+
+        {/* Categories */}
+        <section className="bg-card mt-4">
+          <div className="container mx-auto px-4 py-6">
+            <h2 className="text-xl md:text-2xl font-bold mb-4">Shop Our Categories</h2>
+            <CategoryGrid />
+          </div>
+        </section>
+
+        {/* Flash sales */}
+        <section className="bg-card mt-4">
+          <div className="container mx-auto px-4 py-6">
+            <FlashSales products={flashSaleProducts} onAddToCart={handleAddToCart} />
+          </div>
+        </section>
+
+        {/* Promotional banners */}
+        <section className="bg-card mt-4">
+          <div className="container mx-auto px-4 py-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <a href="#" className="block rounded-lg overflow-hidden group">
+                <div className="relative h-40 md:h-48">
+                  <img
+                    src="https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=800&h=400&fit=crop"
+                    alt="Computing Sale"
+                    className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-transparent flex flex-col justify-center px-6">
+                    <h3 className="text-white text-lg md:text-xl font-bold mb-2">Laptop Upgrade Sale</h3>
+                    <p className="text-white text-sm mb-3">Save up to 30% on selected models</p>
+                    <span className="bg-card text-primary px-3 py-1 rounded-md inline-block w-max text-sm font-medium">
+                      Shop Now
+                    </span>
+                  </div>
+                </div>
+              </a>
+              <a href="#" className="block rounded-lg overflow-hidden group">
+                <div className="relative h-40 md:h-48">
+                  <img
+                    src="https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=800&h=400&fit=crop"
+                    alt="Wearables"
+                    className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-transparent flex flex-col justify-center px-6">
+                    <h3 className="text-white text-lg md:text-xl font-bold mb-2">Smart Wearables</h3>
+                    <p className="text-white text-sm mb-3">Latest fitness trackers and smartwatches</p>
+                    <span className="bg-card text-primary px-3 py-1 rounded-md inline-block w-max text-sm font-medium">
+                      Explore
+                    </span>
+                  </div>
+                </div>
+              </a>
+            </div>
+          </div>
+        </section>
+
+        {/* Popular products */}
+        <section className="bg-card mt-4">
+          <div className="container mx-auto px-4 py-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl md:text-2xl font-bold">Popular Products</h2>
+              <a href="#" className="text-primary hover:underline text-sm font-medium hidden md:flex items-center gap-1">
+                View All <ArrowRight className="h-4 w-4" />
+              </a>
+            </div>
+            
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+              {popularProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  onAddToCart={handleAddToCart}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Newsletter */}
+        <section className="bg-muted mt-4">
+          <div className="container mx-auto px-4 py-8">
+            <div className="max-w-2xl mx-auto text-center">
+              <h2 className="text-xl md:text-2xl font-bold mb-2">Subscribe to Our Newsletter</h2>
+              <p className="text-muted-foreground mb-4">Get updates on new products, special offers and sales</p>
+              <form className="flex flex-col md:flex-row gap-2">
+                <Input
+                  type="email"
+                  placeholder="Your email address"
+                  className="flex-grow"
+                />
+                <Button type="submit" className="bg-primary hover:bg-primary-hover">
+                  Subscribe
+                </Button>
+              </form>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <Footer />
     </div>
   );
 };
