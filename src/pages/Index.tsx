@@ -39,6 +39,27 @@ const Index = () => {
           </div>
         </section>
 
+        {/* Visit Lifestyle Store CTA */}
+        <section className="bg-secondary/10 mt-4 border-y border-secondary/20">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <div>
+                <h2 className="text-lg md:text-xl font-bold">Looking for Lifestyle Products?</h2>
+                <p className="text-muted-foreground text-sm">
+                  Fashion, beauty, toys, home décor & more!
+                </p>
+              </div>
+              <Button
+                onClick={() => navigate("/lifestyle")}
+                className="bg-secondary hover:bg-secondary-hover text-white px-6 py-2 flex items-center gap-2"
+              >
+                Visit Lifestyle Store
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </section>
+
         {/* Categories */}
         <section className="bg-card mt-4">
           <div className="container mx-auto px-4 py-6">
@@ -132,27 +153,6 @@ const Index = () => {
                   Subscribe
                 </Button>
               </form>
-            </div>
-          </div>
-        </section>
-
-        {/* Visit Lifestyle Store CTA */}
-        <section className="bg-card mt-4 border-t border-b">
-          <div className="container mx-auto px-4 py-6">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-              <div>
-                <h2 className="text-xl md:text-2xl font-bold">Looking for Lifestyle Products?</h2>
-                <p className="text-muted-foreground mt-2">
-                  Check out our Lifestyle store for fashion, beauty, toys, home décor, and more!
-                </p>
-              </div>
-              <Button
-                onClick={() => navigate("/lifestyle")}
-                className="bg-secondary hover:bg-secondary-hover text-white px-6 py-3 flex items-center gap-2"
-              >
-                Visit Lifestyle Store
-                <ArrowRight className="h-5 w-5" />
-              </Button>
             </div>
           </div>
         </section>
