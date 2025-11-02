@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import HeroSlider from "@/components/HeroSlider";
 import CategoryGrid from "@/components/CategoryGrid";
@@ -12,6 +13,7 @@ import { flashSaleProducts, popularProducts } from "@/lib/productData";
 import { ArrowRight } from "lucide-react";
 
 const Index = () => {
+  const navigate = useNavigate();
   const [cartItems, setCartItems] = useState<Product[]>([]);
 
   const handleAddToCart = (product: Product) => {
@@ -22,7 +24,7 @@ const Index = () => {
   };
 
   const handleCartClick = () => {
-    toast.info(`You have ${cartItems.length} item(s) in your cart`);
+    navigate("/cart");
   };
 
   return (
@@ -130,6 +132,27 @@ const Index = () => {
                   Subscribe
                 </Button>
               </form>
+            </div>
+          </div>
+        </section>
+
+        {/* Visit Lifestyle Store CTA */}
+        <section className="bg-card mt-4 border-t border-b">
+          <div className="container mx-auto px-4 py-6">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <div>
+                <h2 className="text-xl md:text-2xl font-bold">Looking for Lifestyle Products?</h2>
+                <p className="text-muted-foreground mt-2">
+                  Check out our Lifestyle store for fashion, beauty, toys, home décor, and more!
+                </p>
+              </div>
+              <Button
+                onClick={() => navigate("/lifestyle")}
+                className="bg-secondary hover:bg-secondary-hover text-white px-6 py-3 flex items-center gap-2"
+              >
+                Visit Lifestyle Store
+                <ArrowRight className="h-5 w-5" />
+              </Button>
             </div>
           </div>
         </section>
