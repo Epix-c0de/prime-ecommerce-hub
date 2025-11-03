@@ -1,14 +1,22 @@
-import { Smartphone, Tv, Laptop, Home, Camera, Lightbulb, Package } from "lucide-react";
 import { useCategories } from "@/hooks/useProducts";
+import smartphonesImg from "@/assets/categories/smartphones.jpg";
+import tvAudioImg from "@/assets/categories/tv-audio.jpg";
+import computingImg from "@/assets/categories/computing.jpg";
+import homeAppliancesImg from "@/assets/categories/home-appliances.jpg";
+import camerasImg from "@/assets/categories/cameras.jpg";
+import fashionImg from "@/assets/categories/fashion.jpg";
+import beautyImg from "@/assets/categories/beauty.jpg";
+import toysImg from "@/assets/categories/toys.jpg";
 
-const iconMap: Record<string, any> = {
-  smartphone: Smartphone,
-  tv: Tv,
-  laptop: Laptop,
-  home: Home,
-  camera: Camera,
-  lightbulb: Lightbulb,
-  package: Package,
+const imageMap: Record<string, string> = {
+  smartphone: smartphonesImg,
+  tv: tvAudioImg,
+  laptop: computingImg,
+  home: homeAppliancesImg,
+  camera: camerasImg,
+  fashion: fashionImg,
+  beauty: beautyImg,
+  toys: toysImg,
 };
 
 interface CategoryGridProps {
@@ -25,15 +33,24 @@ const CategoryGrid = ({ storeType }: CategoryGridProps) => {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
       {categories.slice(0, 6).map((category) => {
-        const Icon = iconMap[category.slug] || Package;
+        const categoryImage = imageMap[category.slug] || smartphonesImg;
         return (
           <a
             key={category.id}
             href={`#${category.slug}`}
-            className="bg-card rounded-lg p-6 flex flex-col items-center justify-center hover:shadow-md transition-all hover:-translate-y-1 group"
+            className="bg-card rounded-lg overflow-hidden hover:shadow-md transition-all hover:-translate-y-1 group"
           >
-            <Icon className="h-12 w-12 mb-3 text-primary group-hover:scale-110 transition-transform" />
-            <span className="text-sm font-medium text-center">{category.name}</span>
+            <div className="relative aspect-[4/3] overflow-hidden">
+              <img 
+                src={categoryImage} 
+                alt={category.name}
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+              <span className="absolute bottom-3 left-0 right-0 text-sm font-semibold text-white text-center px-2">
+                {category.name}
+              </span>
+            </div>
           </a>
         );
       })}
