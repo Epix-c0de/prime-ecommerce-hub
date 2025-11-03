@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import HeroSlider from "@/components/HeroSlider";
 import Footer from "@/components/Footer";
+import { PrimeBot } from "@/components/PrimeBot";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ProductCard from "@/components/ProductCard";
@@ -194,6 +195,7 @@ const LifestyleStore = () => {
       </main>
 
       <Footer />
+      <PrimeBot storeType="lifestyle" />
     </div>
   );
 };

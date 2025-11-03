@@ -5,6 +5,7 @@ import CategoryGrid from "@/components/CategoryGrid";
 import FlashSales from "@/components/FlashSales";
 import ProductCard from "@/components/ProductCard";
 import Footer from "@/components/Footer";
+import { PrimeBot } from "@/components/PrimeBot";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -160,6 +161,7 @@ const Index = () => {
       </main>
 
       <Footer />
+      <PrimeBot storeType="tech" />
     </div>
   );
 };
