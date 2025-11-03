@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useCategories } from "@/hooks/useProducts";
+import { SyncStatus } from "./SyncStatus";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,9 +17,13 @@ interface HeaderProps {
   cartCount: number;
   onCartClick: () => void;
   storeType?: 'tech' | 'lifestyle';
+  syncStatus?: {
+    isConnected: boolean;
+    lastUpdate?: number;
+  };
 }
 
-const Header = ({ cartCount, onCartClick, storeType = 'tech' }: HeaderProps) => {
+const Header = ({ cartCount, onCartClick, storeType = 'tech', syncStatus }: HeaderProps) => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const { data: categories = [] } = useCategories(storeType);
@@ -68,8 +73,15 @@ const Header = ({ cartCount, onCartClick, storeType = 'tech' }: HeaderProps) => 
               </form>
             </div>
 
-            {/* Icons */}
+            {/* Sync Status & Icons */}
             <div className="flex items-center gap-4 md:gap-6 order-2 md:order-3">
+              {syncStatus && (
+                <SyncStatus 
+                  isConnected={syncStatus.isConnected} 
+                  lastUpdate={syncStatus.lastUpdate}
+                  className="hidden lg:flex"
+                />
+              )}
               <button className="flex flex-col items-center hover:text-primary transition-colors">
                 <Heart className="h-6 w-6" />
                 <span className="text-xs mt-1 hidden md:block">Wishlist</span>

@@ -16,6 +16,7 @@ import { ArrowRight, Shirt, Gift, Sparkles, Home as HomeIcon, UtensilsCrossed, B
 import { useProducts } from "@/hooks/useProducts";
 import { useCart } from "@/hooks/useCart";
 import { Product } from "@/hooks/useProducts";
+import { usePrimeLinkSync } from "@/hooks/usePrimeLinkSync";
 
 const categories = [
   { name: "Fashion & Clothing", icon: Shirt, color: "text-pink-500" },
@@ -32,6 +33,9 @@ const LifestyleStore = () => {
   const { cartItems, addToCart } = useCart();
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [quickViewOpen, setQuickViewOpen] = useState(false);
+  
+  // Real-time sync with Admin Dashboard
+  const { isConnected, lastUpdate } = usePrimeLinkSync('lifestyle');
 
   const handleAddToCart = (productId: string) => {
     addToCart({ productId });
@@ -82,7 +86,12 @@ const LifestyleStore = () => {
         </div>
       </div>
 
-      <Header cartCount={cartCount} onCartClick={() => navigate('/cart')} storeType="lifestyle" />
+      <Header 
+        cartCount={cartCount} 
+        onCartClick={() => navigate('/cart')} 
+        storeType="lifestyle"
+        syncStatus={{ isConnected, lastUpdate }}
+      />
       
       <main className="flex-grow">
         {/* Hero slider */}

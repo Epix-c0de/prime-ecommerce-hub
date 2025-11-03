@@ -18,6 +18,7 @@ import { ArrowRight } from "lucide-react";
 import { useProducts, useFlashSaleProducts } from "@/hooks/useProducts";
 import { useCart } from "@/hooks/useCart";
 import { Product } from "@/hooks/useProducts";
+import { usePrimeLinkSync } from "@/hooks/usePrimeLinkSync";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -26,6 +27,9 @@ const Index = () => {
   const { cartItems, addToCart } = useCart();
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [quickViewOpen, setQuickViewOpen] = useState(false);
+  
+  // Real-time sync with Admin Dashboard
+  const { isConnected, lastUpdate } = usePrimeLinkSync('tech');
 
   const handleAddToCart = (productId: string) => {
     addToCart({ productId });
@@ -63,7 +67,12 @@ const Index = () => {
         </div>
       </div>
       
-      <Header cartCount={cartCount} onCartClick={handleCartClick} storeType="tech" />
+      <Header 
+        cartCount={cartCount} 
+        onCartClick={handleCartClick} 
+        storeType="tech"
+        syncStatus={{ isConnected, lastUpdate }}
+      />
       
       <main className="flex-grow">
         {/* Hero slider */}
