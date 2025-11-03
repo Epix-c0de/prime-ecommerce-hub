@@ -118,12 +118,33 @@ const Header = ({ cartCount, onCartClick, storeType = 'tech' }: HeaderProps) => 
               </li>
               {categories.slice(0, 5).map((category) => (
                 <li key={category.id}>
-                  <button
-                    onClick={() => navigate(`/category/${category.slug}`)}
-                    className="p-2 hover:text-primary transition-colors hover:underline"
-                  >
-                    {category.name}
-                  </button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button className="flex items-center gap-1 p-2 hover:text-primary transition-colors">
+                        {category.name} <ChevronDown className="h-3 w-3" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start" className="w-56 bg-card z-50">
+                      <DropdownMenuItem
+                        onClick={() => navigate(`/category/${category.slug}`)}
+                        className="cursor-pointer font-medium"
+                      >
+                        All {category.name}
+                      </DropdownMenuItem>
+                      {/* Placeholder for subcategories */}
+                      {categories
+                        .filter(c => c.parent_id === category.id)
+                        .map(subcat => (
+                          <DropdownMenuItem
+                            key={subcat.id}
+                            onClick={() => navigate(`/category/${subcat.slug}`)}
+                            className="cursor-pointer pl-4"
+                          >
+                            {subcat.name}
+                          </DropdownMenuItem>
+                        ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </li>
               ))}
               <li className="hidden md:block">
