@@ -9,6 +9,8 @@ import { Star, ShoppingCart, Heart, Share2, Minus, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { useProductBySlug, useProducts } from "@/hooks/useProducts";
 import { useCart } from "@/hooks/useCart";
+import { useWishlist } from "@/hooks/useWishlist";
+import { useReviews } from "@/hooks/useReviews";
 import ProductCard from "@/components/ProductCard";
 
 const ProductDetail = () => {
@@ -20,6 +22,8 @@ const ProductDetail = () => {
   const { data: product, isLoading } = useProductBySlug(slug || '');
   const { data: allProducts = [] } = useProducts();
   const { cartItems, addToCart } = useCart();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const { reviews, averageRating, reviewCount } = useReviews(product?.id);
 
   if (isLoading) {
     return (
@@ -63,7 +67,16 @@ const ProductDetail = () => {
     ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
     : 0;
 
-  const rating = product.rating || 4.5;
+  const rating = averageRating || product.rating || 0;
+
+  const handleWishlistToggle = () => {
+    if (!product) return;
+    if (isInWishlist(product.id)) {
+      removeFromWishlist(product.id);
+    } else {
+      addToWishlist(product.id);
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -124,7 +137,7 @@ const ProductDetail = () => {
                   ))}
                 </div>
                 <span className="text-sm text-muted-foreground">
-                  (0 reviews)
+                  ({reviewCount} review{reviewCount !== 1 ? 's' : ''})
                 </span>
               </div>
 
@@ -188,9 +201,14 @@ const ProductDetail = () => {
               </div>
 
               <div className="flex gap-3">
-                <Button variant="outline" size="lg" className="flex-1">
-                  <Heart className="mr-2 h-5 w-5" />
-                  Add to Wishlist
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  className="flex-1"
+                  onClick={handleWishlistToggle}
+                >
+                  <Heart className={`mr-2 h-5 w-5 ${isInWishlist(product.id) ? 'fill-red-500 text-red-500' : ''}`} />
+                  {isInWishlist(product.id) ? 'Remove from Wishlist' : 'Add to Wishlist'}
                 </Button>
                 <Button variant="outline" size="lg">
                   <Share2 className="h-5 w-5" />
@@ -215,7 +233,7 @@ const ProductDetail = () => {
               <TabsList className="w-full justify-start">
               <TabsTrigger value="description">Description</TabsTrigger>
               <TabsTrigger value="specifications">Specifications</TabsTrigger>
-              <TabsTrigger value="reviews">Reviews (0)</TabsTrigger>
+              <TabsTrigger value="reviews">Reviews ({reviewCount})</TabsTrigger>
               <TabsTrigger value="shipping">Shipping Info</TabsTrigger>
             </TabsList>
             <TabsContent value="description" className="bg-card p-6 rounded-lg mt-4">
@@ -252,7 +270,35 @@ const ProductDetail = () => {
             </TabsContent>
             <TabsContent value="reviews" className="bg-card p-6 rounded-lg mt-4">
               <h3 className="font-semibold text-lg mb-4">Customer Reviews</h3>
-              <p className="text-muted-foreground">No reviews yet. Be the first to review this product!</p>
+              {reviewCount > 0 ? (
+                <div className="space-y-4">
+                  {reviews.map((review) => (
+                    <div key={review.id} className="border-b pb-4 last:border-0">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="flex">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`h-4 w-4 ${
+                                i < review.rating
+                                  ? "fill-yellow-400 text-yellow-400"
+                                  : "fill-gray-200 text-gray-200"
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-sm text-muted-foreground">
+                          {new Date(review.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                      {review.title && <h4 className="font-semibold mb-1">{review.title}</h4>}
+                      {review.comment && <p className="text-sm text-muted-foreground">{review.comment}</p>}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted-foreground">No reviews yet. Be the first to review this product!</p>
+              )}
             </TabsContent>
             <TabsContent value="shipping" className="bg-card p-6 rounded-lg mt-4">
               <h3 className="font-semibold text-lg mb-4">Shipping Information</h3>
