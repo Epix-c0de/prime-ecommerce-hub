@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -11,11 +11,16 @@ import { useProductBySlug, useProducts } from "@/hooks/useProducts";
 import { useCart } from "@/hooks/useCart";
 import { useWishlist } from "@/hooks/useWishlist";
 import { useReviews } from "@/hooks/useReviews";
+import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
+import { useComparison } from "@/hooks/useComparison";
 import ProductCard from "@/components/ProductCard";
 import { Product3DViewer } from "@/components/Product3DViewer";
 import { ARViewer } from "@/components/ARViewer";
 import { ProductPersonalization } from "@/components/ProductPersonalization";
 import { GiftRegistryDialog } from "@/components/GiftRegistryDialog";
+import { CompleteTheSet } from "@/components/CompleteTheSet";
+import { ComparisonButton } from "@/components/ComparisonButton";
+import { ComparisonModal } from "@/components/ComparisonModal";
 
 const ProductDetail = () => {
   const { slug } = useParams();
@@ -31,6 +36,16 @@ const ProductDetail = () => {
   const { cartItems, addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const { reviews, averageRating, reviewCount } = useReviews(product?.id);
+  const { addToRecentlyViewed } = useRecentlyViewed();
+  const { addToComparison, compareProducts, removeFromComparison, clearComparison, isInComparison } = useComparison();
+  const [showComparison, setShowComparison] = useState(false);
+
+  // Track product view
+  useEffect(() => {
+    if (product) {
+      addToRecentlyViewed(product);
+    }
+  }, [product]);
 
   if (isLoading) {
     return (

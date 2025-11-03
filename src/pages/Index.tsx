@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import Header from "@/components/Header";
 import HeroSlider from "@/components/HeroSlider";
 import CategoryGrid from "@/components/CategoryGrid";
@@ -6,18 +7,24 @@ import FlashSales from "@/components/FlashSales";
 import ProductCard from "@/components/ProductCard";
 import Footer from "@/components/Footer";
 import { PrimeBot } from "@/components/PrimeBot";
+import { QuickViewModal } from "@/components/QuickViewModal";
+import { RecentlyViewed } from "@/components/RecentlyViewed";
+import { BackToTop } from "@/components/BackToTop";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { ArrowRight } from "lucide-react";
 import { useProducts, useFlashSaleProducts } from "@/hooks/useProducts";
 import { useCart } from "@/hooks/useCart";
+import { Product } from "@/hooks/useProducts";
 
 const Index = () => {
   const navigate = useNavigate();
   const { data: flashSaleProducts = [] } = useFlashSaleProducts('tech');
   const { data: popularProducts = [] } = useProducts('tech', true);
   const { cartItems, addToCart } = useCart();
+  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
+  const [quickViewOpen, setQuickViewOpen] = useState(false);
 
   const handleAddToCart = (productId: string) => {
     addToCart({ productId });
@@ -25,6 +32,11 @@ const Index = () => {
 
   const handleCartClick = () => {
     navigate("/cart");
+  };
+
+  const handleQuickView = (product: Product) => {
+    setQuickViewProduct(product);
+    setQuickViewOpen(true);
   };
 
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
@@ -131,11 +143,15 @@ const Index = () => {
                   key={product.id}
                   product={product}
                   onAddToCart={handleAddToCart}
+                  onQuickView={handleQuickView}
                 />
               ))}
             </div>
           </div>
         </section>
+
+        {/* Recently Viewed */}
+        <RecentlyViewed onAddToCart={handleAddToCart} />
 
         {/* Newsletter */}
         <section className="bg-muted mt-4">
@@ -160,6 +176,14 @@ const Index = () => {
 
       <Footer />
       <PrimeBot storeType="tech" />
+      <BackToTop />
+      
+      <QuickViewModal
+        product={quickViewProduct}
+        open={quickViewOpen}
+        onOpenChange={setQuickViewOpen}
+        onAddToCart={handleAddToCart}
+      />
     </div>
   );
 };

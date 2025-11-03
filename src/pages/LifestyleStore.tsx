@@ -1,8 +1,12 @@
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import Header from "@/components/Header";
 import HeroSlider from "@/components/HeroSlider";
 import Footer from "@/components/Footer";
 import { PrimeBot } from "@/components/PrimeBot";
+import { QuickViewModal } from "@/components/QuickViewModal";
+import { RecentlyViewed } from "@/components/RecentlyViewed";
+import { BackToTop } from "@/components/BackToTop";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ProductCard from "@/components/ProductCard";
@@ -10,6 +14,7 @@ import { toast } from "sonner";
 import { ArrowRight, Shirt, Gift, Sparkles, Home as HomeIcon, UtensilsCrossed, Bike } from "lucide-react";
 import { useProducts } from "@/hooks/useProducts";
 import { useCart } from "@/hooks/useCart";
+import { Product } from "@/hooks/useProducts";
 
 const categories = [
   { name: "Fashion & Clothing", icon: Shirt, color: "text-pink-500" },
@@ -24,9 +29,16 @@ const LifestyleStore = () => {
   const navigate = useNavigate();
   const { data: lifestyleProducts = [] } = useProducts('lifestyle', true);
   const { cartItems, addToCart } = useCart();
+  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
+  const [quickViewOpen, setQuickViewOpen] = useState(false);
 
   const handleAddToCart = (productId: string) => {
     addToCart({ productId });
+  };
+
+  const handleQuickView = (product: Product) => {
+    setQuickViewProduct(product);
+    setQuickViewOpen(true);
   };
 
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
@@ -106,11 +118,15 @@ const LifestyleStore = () => {
                   key={product.id}
                   product={product}
                   onAddToCart={handleAddToCart}
+                  onQuickView={handleQuickView}
                 />
               ))}
             </div>
           </div>
         </section>
+
+        {/* Recently Viewed */}
+        <RecentlyViewed onAddToCart={handleAddToCart} />
 
         {/* Promotional banner */}
         <section className="bg-card mt-4">
@@ -196,6 +212,14 @@ const LifestyleStore = () => {
 
       <Footer />
       <PrimeBot storeType="lifestyle" />
+      <BackToTop />
+      
+      <QuickViewModal
+        product={quickViewProduct}
+        open={quickViewOpen}
+        onOpenChange={setQuickViewOpen}
+        onAddToCart={handleAddToCart}
+      />
     </div>
   );
 };

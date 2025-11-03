@@ -1,5 +1,6 @@
-import { ShoppingCart, Star } from "lucide-react";
+import { ShoppingCart, Star, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -10,10 +11,12 @@ export type { Product };
 interface ProductCardProps {
   product: Product;
   onAddToCart: (productId: string) => void;
+  onQuickView?: (product: Product) => void;
 }
 
-const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
+const ProductCard = ({ product, onAddToCart, onQuickView }: ProductCardProps) => {
   const navigate = useNavigate();
+  const [isHovered, setIsHovered] = useState(false);
   const discountPercentage = product.original_price
     ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
     : 0;
@@ -22,7 +25,11 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
   const reviews = 0; // We'll add reviews later
 
   return (
-    <Card className="group overflow-hidden transition-all hover:-translate-y-1 hover:shadow-lg">
+    <Card 
+      className="group overflow-hidden transition-all hover:-translate-y-1 hover:shadow-lg"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <div 
         className="relative overflow-hidden bg-muted cursor-pointer"
         onClick={() => navigate(`/product/${product.slug}`)}
@@ -41,6 +48,22 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
           <Badge className="absolute top-2 right-2 bg-warning text-warning-foreground">
             Only {product.stock} left
           </Badge>
+        )}
+        
+        {/* Quick View Button */}
+        {onQuickView && isHovered && (
+          <Button
+            onClick={(e) => {
+              e.stopPropagation();
+              onQuickView(product);
+            }}
+            variant="secondary"
+            size="sm"
+            className="absolute bottom-2 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity shadow-md"
+          >
+            <Eye className="w-4 h-4 mr-2" />
+            Quick View
+          </Button>
         )}
       </div>
       <div className="p-4">
