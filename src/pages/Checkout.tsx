@@ -11,6 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { useCart } from "@/hooks/useCart";
 import { useOrders } from "@/hooks/useOrders";
+import { shippingSchema } from "@/lib/validation";
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -191,7 +192,16 @@ const Checkout = () => {
                     </div>
                   </div>
                   <Button
-                    onClick={() => setStep(2)}
+                    onClick={() => {
+                      // Validate shipping data before proceeding
+                      const validation = shippingSchema.safeParse(shippingData);
+                      if (!validation.success) {
+                        const firstError = validation.error.errors[0];
+                        toast.error(firstError.message);
+                        return;
+                      }
+                      setStep(2);
+                    }}
                     className="w-full mt-6 bg-primary hover:bg-primary-hover"
                   >
                     Continue to Payment

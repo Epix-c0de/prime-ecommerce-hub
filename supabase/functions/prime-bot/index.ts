@@ -2,6 +2,34 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
 
+// Simple in-memory rate limiter
+interface RateLimitEntry {
+  count: number;
+  resetTime: number;
+}
+
+const rateLimitMap = new Map<string, RateLimitEntry>();
+
+function checkRateLimit(identifier: string, limit: number = 20, windowSeconds: number = 60) {
+  const now = Date.now();
+  const windowMs = windowSeconds * 1000;
+  const entry = rateLimitMap.get(identifier);
+  
+  if (!entry || now > entry.resetTime) {
+    const resetTime = now + windowMs;
+    rateLimitMap.set(identifier, { count: 1, resetTime });
+    return { allowed: true, remaining: limit - 1, resetTime };
+  }
+  
+  if (entry.count >= limit) {
+    return { allowed: false, remaining: 0, resetTime: entry.resetTime };
+  }
+  
+  entry.count++;
+  rateLimitMap.set(identifier, entry);
+  return { allowed: true, remaining: limit - entry.count, resetTime: entry.resetTime };
+}
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -13,6 +41,34 @@ serve(async (req) => {
   }
 
   try {
+    // Rate limiting: 20 requests per minute per IP
+    const identifier = req.headers.get('x-forwarded-for') || 
+                      req.headers.get('x-real-ip') || 
+                      'anonymous';
+    
+    const rateLimit = checkRateLimit(identifier, 20, 60);
+    
+    if (!rateLimit.allowed) {
+      console.log(`Rate limit exceeded for ${identifier}`);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Too many requests. Please try again later.',
+          retryAfter: Math.ceil((rateLimit.resetTime - Date.now()) / 1000)
+        }), 
+        { 
+          status: 429,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json',
+            'X-RateLimit-Limit': '20',
+            'X-RateLimit-Remaining': rateLimit.remaining.toString(),
+            'X-RateLimit-Reset': new Date(rateLimit.resetTime).toISOString(),
+            'Retry-After': Math.ceil((rateLimit.resetTime - Date.now()) / 1000).toString()
+          }
+        }
+      );
+    }
+
     const { messages, storeType } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     

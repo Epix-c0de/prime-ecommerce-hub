@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { signUpSchema, signInSchema, resetPasswordSchema } from "@/lib/validation";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -27,6 +28,15 @@ const Auth = () => {
     const formData = new FormData(e.currentTarget);
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
+
+    // Validate input
+    const validation = signInSchema.safeParse({ email, password });
+    if (!validation.success) {
+      const firstError = validation.error.errors[0];
+      toast.error(firstError.message);
+      setIsLoading(false);
+      return;
+    }
 
     const { error } = await signIn(email, password);
     
@@ -49,8 +59,19 @@ const Auth = () => {
     const lastName = formData.get("lastName") as string;
     const phone = formData.get("phone") as string;
 
-    if (password !== confirmPassword) {
-      toast.error("Passwords do not match");
+    // Validate input
+    const validation = signUpSchema.safeParse({
+      email,
+      password,
+      confirmPassword,
+      firstName,
+      lastName,
+      phone,
+    });
+    
+    if (!validation.success) {
+      const firstError = validation.error.errors[0];
+      toast.error(firstError.message);
       setIsLoading(false);
       return;
     }
@@ -74,6 +95,15 @@ const Auth = () => {
     
     const formData = new FormData(e.currentTarget);
     const email = formData.get("resetEmail") as string;
+
+    // Validate input
+    const validation = resetPasswordSchema.safeParse({ email });
+    if (!validation.success) {
+      const firstError = validation.error.errors[0];
+      toast.error(firstError.message);
+      setIsLoading(false);
+      return;
+    }
 
     await resetPassword(email);
     
