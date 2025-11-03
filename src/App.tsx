@@ -14,6 +14,8 @@ import Checkout from "./pages/Checkout";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import GiftRegistry from "./pages/GiftRegistry";
+import StyleQuiz from "./pages/StyleQuiz";
+import OutfitMatcher from "./pages/OutfitMatcher";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -39,6 +41,8 @@ const App = () => (
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/dashboard/orders" element={<Dashboard />} />
             <Route path="/registry/:shareCode" element={<GiftRegistry />} />
+            <Route path="/style-quiz" element={<StyleQuiz />} />
+            <Route path="/outfit-matcher" element={<OutfitMatcher />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

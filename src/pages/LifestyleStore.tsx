@@ -7,6 +7,7 @@ import { PrimeBot } from "@/components/PrimeBot";
 import { QuickViewModal } from "@/components/QuickViewModal";
 import { RecentlyViewed } from "@/components/RecentlyViewed";
 import { BackToTop } from "@/components/BackToTop";
+import { SocialProof } from "@/components/SocialProof";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ProductCard from "@/components/ProductCard";
@@ -45,17 +46,40 @@ const LifestyleStore = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Store Switch Banner */}
-      <div className="bg-secondary text-white text-center text-xs md:text-sm py-2 px-4">
-        <p>
-          Looking for electronics? 
-          <button 
-            onClick={() => navigate("/")}
-            className="ml-2 underline font-semibold hover:text-primary transition"
-          >
-            Visit Tech Store →
-          </button>
-        </p>
+      {/* Feature Banner */}
+      <div className="bg-gradient-to-r from-primary to-secondary text-white py-3 px-4">
+        <div className="container mx-auto flex items-center justify-center md:justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-2">
+            <span className="text-sm">Looking for Tech & Electronics?</span>
+            <Button
+              onClick={() => navigate("/")}
+              variant="outline"
+              size="sm"
+              className="bg-white text-primary hover:bg-white/90 border-0"
+            >
+              Visit Tech Store
+              <ArrowRight className="ml-2 h-3 w-3" />
+            </Button>
+          </div>
+          <div className="flex gap-3">
+            <Button
+              onClick={() => navigate("/style-quiz")}
+              variant="outline"
+              size="sm"
+              className="bg-white/10 text-white hover:bg-white/20 border-white/30"
+            >
+              Take Style Quiz
+            </Button>
+            <Button
+              onClick={() => navigate("/outfit-matcher")}
+              variant="outline"
+              size="sm"
+              className="bg-white/10 text-white hover:bg-white/20 border-white/30"
+            >
+              Outfit Matcher
+            </Button>
+          </div>
+        </div>
       </div>
 
       <Header cartCount={cartCount} onCartClick={() => navigate('/cart')} storeType="lifestyle" />
@@ -127,6 +151,9 @@ const LifestyleStore = () => {
 
         {/* Recently Viewed */}
         <RecentlyViewed onAddToCart={handleAddToCart} />
+
+        {/* Social Proof */}
+        <SocialProof />
 
         {/* Promotional banner */}
         <section className="bg-card mt-4">

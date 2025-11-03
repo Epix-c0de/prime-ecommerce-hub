@@ -10,6 +10,7 @@ import { PrimeBot } from "@/components/PrimeBot";
 import { QuickViewModal } from "@/components/QuickViewModal";
 import { RecentlyViewed } from "@/components/RecentlyViewed";
 import { BackToTop } from "@/components/BackToTop";
+import { SocialProof } from "@/components/SocialProof";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -152,6 +153,9 @@ const Index = () => {
 
         {/* Recently Viewed */}
         <RecentlyViewed onAddToCart={handleAddToCart} />
+
+        {/* Social Proof */}
+        <SocialProof />
 
         {/* Newsletter */}
         <section className="bg-muted mt-4">

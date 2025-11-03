@@ -5,7 +5,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Star, ShoppingCart, Heart, Share2, Minus, Plus, Gift, Eye } from "lucide-react";
+import { Star, ShoppingCart, Heart, Share2, Minus, Plus, Gift, Eye, GitCompare } from "lucide-react";
 import { toast } from "sonner";
 import { useProductBySlug, useProducts } from "@/hooks/useProducts";
 import { useCart } from "@/hooks/useCart";
@@ -248,22 +248,32 @@ const ProductDetail = () => {
                 </Button>
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-4 gap-3">
                 <Button 
                   variant="outline" 
                   size="lg"
                   onClick={handleWishlistToggle}
                 >
-                  <Heart className={`mr-2 h-5 w-5 ${isInWishlist(product.id) ? 'fill-red-500 text-red-500' : ''}`} />
-                  Wishlist
+                  <Heart className={`h-5 w-5 ${isInWishlist(product.id) ? 'fill-red-500 text-red-500' : ''}`} />
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="lg"
+                  onClick={() => {
+                    const added = addToComparison(product);
+                    if (!added) {
+                      toast.error("Maximum 3 products can be compared");
+                    }
+                  }}
+                >
+                  <GitCompare className="h-5 w-5" />
                 </Button>
                 <Button 
                   variant="outline" 
                   size="lg"
                   onClick={() => setShowRegistryDialog(true)}
                 >
-                  <Gift className="mr-2 h-5 w-5" />
-                  Registry
+                  <Gift className="h-5 w-5" />
                 </Button>
                 <Button variant="outline" size="lg">
                   <Share2 className="h-5 w-5" />
@@ -384,6 +394,17 @@ const ProductDetail = () => {
             </TabsContent>
           </Tabs>
 
+          {/* Complete the Set */}
+          {relatedProducts.length > 0 && (
+            <div className="mb-12">
+              <CompleteTheSet 
+                mainProduct={product}
+                bundleProducts={relatedProducts.slice(0, 3)}
+                onAddToCart={(productId) => addToCart({ productId })}
+              />
+            </div>
+          )}
+
           {/* Related Products */}
           <div>
             <h2 className="text-2xl font-bold mb-6">Related Products</h2>
@@ -400,6 +421,19 @@ const ProductDetail = () => {
             </div>
           </div>
         </div>
+
+        {/* Comparison Button */}
+        <ComparisonButton onClick={() => setShowComparison(true)} />
+
+        {/* Comparison Modal */}
+        <ComparisonModal
+          products={compareProducts}
+          open={showComparison}
+          onOpenChange={setShowComparison}
+          onRemove={removeFromComparison}
+          onClear={clearComparison}
+          onAddToCart={(productId) => addToCart({ productId })}
+        />
       </main>
 
       <Footer />
