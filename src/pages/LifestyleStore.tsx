@@ -28,6 +28,8 @@ const LifestyleStore = () => {
     addToCart({ productId });
   };
 
+  const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* Store Switch Banner */}
@@ -43,7 +45,7 @@ const LifestyleStore = () => {
         </p>
       </div>
 
-      <Header cartCount={cartItems.length} onCartClick={() => navigate("/cart")} />
+      <Header cartCount={cartCount} onCartClick={() => navigate('/cart')} storeType="lifestyle" />
       
       <main className="flex-grow">
         {/* Hero slider */}

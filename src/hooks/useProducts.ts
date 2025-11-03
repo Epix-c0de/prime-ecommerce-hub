@@ -22,9 +22,23 @@ export interface Product {
   rating?: number;
 }
 
-export function useProducts(storeType?: 'tech' | 'lifestyle', featured?: boolean) {
+export interface ProductFilters {
+  categoryId?: string;
+  search?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  brand?: string;
+  minRating?: number;
+  sortBy?: 'price_asc' | 'price_desc' | 'newest' | 'rating';
+}
+
+export function useProducts(
+  storeType?: 'tech' | 'lifestyle', 
+  featured?: boolean,
+  filters?: ProductFilters
+) {
   return useQuery({
-    queryKey: ['products', storeType, featured],
+    queryKey: ['products', storeType, featured, filters],
     queryFn: async () => {
       let query = supabase
         .from('products')
@@ -39,10 +53,71 @@ export function useProducts(storeType?: 'tech' | 'lifestyle', featured?: boolean
         query = query.eq('is_featured', featured);
       }
 
-      const { data, error } = await query.order('created_at', { ascending: false });
+      if (filters?.categoryId) {
+        query = query.eq('category_id', filters.categoryId);
+      }
+
+      if (filters?.search) {
+        query = query.ilike('name', `%${filters.search}%`);
+      }
+
+      if (filters?.minPrice !== undefined) {
+        query = query.gte('price', filters.minPrice);
+      }
+
+      if (filters?.maxPrice !== undefined) {
+        query = query.lte('price', filters.maxPrice);
+      }
+
+      if (filters?.brand) {
+        query = query.eq('brand', filters.brand);
+      }
+
+      // Sorting
+      if (filters?.sortBy === 'price_asc') {
+        query = query.order('price', { ascending: true });
+      } else if (filters?.sortBy === 'price_desc') {
+        query = query.order('price', { ascending: false });
+      } else if (filters?.sortBy === 'rating') {
+        query = query.order('rating', { ascending: false });
+      } else {
+        query = query.order('created_at', { ascending: false });
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
-      return data as Product[];
+      
+      // Filter by rating on client side if needed
+      let filteredData = data as Product[];
+      if (filters?.minRating) {
+        filteredData = filteredData.filter(p => (p.rating || 0) >= filters.minRating!);
+      }
+
+      return filteredData;
+    },
+  });
+}
+
+export function useBrands(storeType?: 'tech' | 'lifestyle') {
+  return useQuery({
+    queryKey: ['brands', storeType],
+    queryFn: async () => {
+      let query = supabase
+        .from('products')
+        .select('brand')
+        .not('brand', 'is', null);
+
+      if (storeType) {
+        query = query.eq('store_type', storeType);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+
+      // Get unique brands
+      const brands = [...new Set(data.map(p => p.brand).filter(Boolean))];
+      return brands as string[];
     },
   });
 }

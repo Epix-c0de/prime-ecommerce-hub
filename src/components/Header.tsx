@@ -1,14 +1,34 @@
-import { ShoppingCart, Heart, User, Search, Menu } from "lucide-react";
+import { useState, FormEvent } from "react";
+import { useNavigate } from "react-router-dom";
+import { ShoppingCart, Heart, User, Search, Menu, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { useCategories } from "@/hooks/useProducts";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface HeaderProps {
   cartCount: number;
   onCartClick: () => void;
+  storeType?: 'tech' | 'lifestyle';
 }
 
-const Header = ({ cartCount, onCartClick }: HeaderProps) => {
+const Header = ({ cartCount, onCartClick, storeType = 'tech' }: HeaderProps) => {
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState("");
+  const { data: categories = [] } = useCategories(storeType);
+
+  const handleSearch = (e: FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
   return (
     <>
       {/* Top banner */}
@@ -32,11 +52,13 @@ const Header = ({ cartCount, onCartClick }: HeaderProps) => {
 
             {/* Search bar */}
             <div className="flex-grow max-w-3xl mx-4 order-3 md:order-2 w-full md:w-auto">
-              <form className="flex items-center gap-2">
+              <form onSubmit={handleSearch} className="flex items-center gap-2">
                 <div className="relative flex-grow">
                   <Input
                     type="text"
                     placeholder="Search products, brands and categories..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
                     className="pr-10"
                   />
                 </div>
@@ -75,16 +97,43 @@ const Header = ({ cartCount, onCartClick }: HeaderProps) => {
           <nav className="mt-3 border-t pt-2">
             <ul className="flex flex-wrap items-center gap-1 md:gap-6 text-sm md:text-base overflow-x-auto">
               <li>
-                <a href="#" className="flex items-center gap-1 p-2 hover:text-primary transition-colors font-medium">
-                  <Menu className="h-4 w-4" /> All Categories
-                </a>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="flex items-center gap-1 p-2 hover:text-primary transition-colors font-medium">
+                      <Menu className="h-4 w-4" /> All Categories <ChevronDown className="h-4 w-4" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="w-56 max-h-96 overflow-y-auto bg-card z-50">
+                    {categories.map((category) => (
+                      <DropdownMenuItem
+                        key={category.id}
+                        onClick={() => navigate(`/category/${category.slug}`)}
+                        className="cursor-pointer"
+                      >
+                        {category.name}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </li>
-              <li><a href="#" className="p-2 hover:text-primary transition-colors">Phones & Tablets</a></li>
-              <li><a href="#" className="p-2 hover:text-primary transition-colors">TVs & Audio</a></li>
-              <li><a href="#" className="p-2 hover:text-primary transition-colors">Computing</a></li>
-              <li><a href="#" className="p-2 hover:text-primary transition-colors">Home Appliances</a></li>
-              <li className="hidden md:block"><a href="#" className="p-2 hover:text-primary transition-colors">Official Stores</a></li>
-              <li className="hidden md:block"><a href="#" className="p-2 hover:text-primary transition-colors">Daily Deals</a></li>
+              {categories.slice(0, 5).map((category) => (
+                <li key={category.id}>
+                  <button
+                    onClick={() => navigate(`/category/${category.slug}`)}
+                    className="p-2 hover:text-primary transition-colors hover:underline"
+                  >
+                    {category.name}
+                  </button>
+                </li>
+              ))}
+              <li className="hidden md:block">
+                <button
+                  onClick={() => navigate('/')}
+                  className="p-2 hover:text-primary transition-colors"
+                >
+                  Daily Deals
+                </button>
+              </li>
             </ul>
           </nav>
         </div>

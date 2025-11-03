@@ -26,9 +26,11 @@ const Index = () => {
     navigate("/cart");
   };
 
+  const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+
   return (
     <div className="min-h-screen flex flex-col">
-      <Header cartCount={cartItems.length} onCartClick={handleCartClick} />
+      <Header cartCount={cartCount} onCartClick={handleCartClick} storeType="tech" />
       
       <main className="flex-grow">
         {/* Hero slider */}

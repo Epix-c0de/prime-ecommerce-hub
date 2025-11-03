@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import Index from "./pages/Index";
 import LifestyleStore from "./pages/LifestyleStore";
+import CategoryPage from "./pages/CategoryPage";
+import SearchPage from "./pages/SearchPage";
 import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
@@ -25,6 +27,10 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/lifestyle" element={<LifestyleStore />} />
+            <Route path="/category/:slug" element={<CategoryPage storeType="tech" />} />
+            <Route path="/lifestyle/category/:slug" element={<CategoryPage storeType="lifestyle" />} />
+            <Route path="/search" element={<SearchPage storeType="tech" />} />
+            <Route path="/lifestyle/search" element={<SearchPage storeType="lifestyle" />} />
             <Route path="/product/:id" element={<ProductDetail />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
