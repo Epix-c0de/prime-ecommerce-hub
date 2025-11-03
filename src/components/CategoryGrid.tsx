@@ -1,23 +1,35 @@
-import { Smartphone, Tv, Laptop, Home, Camera, Lightbulb } from "lucide-react";
+import { Smartphone, Tv, Laptop, Home, Camera, Lightbulb, Package } from "lucide-react";
+import { useCategories } from "@/hooks/useProducts";
 
-const categories = [
-  { name: "Phones & Tablets", icon: Smartphone },
-  { name: "TVs & Audio", icon: Tv },
-  { name: "Computing", icon: Laptop },
-  { name: "Home Appliances", icon: Home },
-  { name: "Cameras", icon: Camera },
-  { name: "Smart Home", icon: Lightbulb },
-];
+const iconMap: Record<string, any> = {
+  smartphone: Smartphone,
+  tv: Tv,
+  laptop: Laptop,
+  home: Home,
+  camera: Camera,
+  lightbulb: Lightbulb,
+  package: Package,
+};
 
-const CategoryGrid = () => {
+interface CategoryGridProps {
+  storeType?: 'tech' | 'lifestyle';
+}
+
+const CategoryGrid = ({ storeType }: CategoryGridProps) => {
+  const { data: categories = [], isLoading } = useCategories(storeType);
+
+  if (isLoading) {
+    return <div className="text-center py-8">Loading categories...</div>;
+  }
+
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
-      {categories.map((category) => {
-        const Icon = category.icon;
+      {categories.slice(0, 6).map((category) => {
+        const Icon = iconMap[category.slug] || Package;
         return (
           <a
-            key={category.name}
-            href="#"
+            key={category.id}
+            href={`#${category.slug}`}
             className="bg-card rounded-lg p-6 flex flex-col items-center justify-center hover:shadow-md transition-all hover:-translate-y-1 group"
           >
             <Icon className="h-12 w-12 mb-3 text-primary group-hover:scale-110 transition-transform" />
