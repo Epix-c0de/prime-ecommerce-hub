@@ -5,19 +5,26 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Star, ShoppingCart, Heart, Share2, Minus, Plus } from "lucide-react";
+import { Star, ShoppingCart, Heart, Share2, Minus, Plus, Gift, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { useProductBySlug, useProducts } from "@/hooks/useProducts";
 import { useCart } from "@/hooks/useCart";
 import { useWishlist } from "@/hooks/useWishlist";
 import { useReviews } from "@/hooks/useReviews";
 import ProductCard from "@/components/ProductCard";
+import { Product3DViewer } from "@/components/Product3DViewer";
+import { ARViewer } from "@/components/ARViewer";
+import { ProductPersonalization } from "@/components/ProductPersonalization";
+import { GiftRegistryDialog } from "@/components/GiftRegistryDialog";
 
 const ProductDetail = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [showRegistryDialog, setShowRegistryDialog] = useState(false);
+  const [personalization, setPersonalization] = useState<Record<string, any>>({});
+  const [show3D, setShow3D] = useState(false);
   
   const { data: product, isLoading } = useProductBySlug(slug || '');
   const { data: allProducts = [] } = useProducts();
@@ -94,28 +101,54 @@ const ProductDetail = () => {
           </nav>
 
           <div className="grid md:grid-cols-2 gap-8 mb-12">
-            {/* Product Images */}
-            <div>
-              <div className="bg-card rounded-lg p-4 mb-4">
-                <img
-                  src={product.images[selectedImage] || product.images[0] || '/placeholder.svg'}
-                  alt={product.name}
-                  className="w-full h-96 object-contain"
-                />
+            {/* Product Images & 3D/AR */}
+            <div className="space-y-4">
+              <div className="bg-card rounded-lg p-4">
+                {show3D && product.model_url ? (
+                  <Product3DViewer modelUrl={product.model_url} productName={product.name} />
+                ) : (
+                  <img
+                    src={product.images[selectedImage] || product.images[0] || '/placeholder.svg'}
+                    alt={product.name}
+                    className="w-full h-96 object-contain"
+                  />
+                )}
               </div>
+              
               <div className="flex gap-2">
                 {product.images.slice(0, 3).map((img, idx) => (
                   <button
                     key={idx}
-                    onClick={() => setSelectedImage(idx)}
+                    onClick={() => {
+                      setSelectedImage(idx);
+                      setShow3D(false);
+                    }}
                     className={`bg-card rounded-lg p-2 flex-1 ${
-                      selectedImage === idx ? "ring-2 ring-primary" : ""
+                      selectedImage === idx && !show3D ? "ring-2 ring-primary" : ""
                     }`}
                   >
                     <img src={img} alt="" className="w-full h-20 object-contain" />
                   </button>
                 ))}
+                {product.model_url && (
+                  <button
+                    onClick={() => setShow3D(!show3D)}
+                    className={`bg-card rounded-lg p-2 flex-1 flex items-center justify-center ${
+                      show3D ? "ring-2 ring-primary" : ""
+                    }`}
+                  >
+                    <Eye className="w-6 h-6 text-primary" />
+                  </button>
+                )}
               </div>
+
+              {product.ar_enabled && (
+                <ARViewer 
+                  modelUrl={product.model_url}
+                  productName={product.name}
+                  productImage={product.images[0] || '/placeholder.svg'}
+                />
+              )}
             </div>
 
             {/* Product Info */}
@@ -200,20 +233,37 @@ const ProductDetail = () => {
                 </Button>
               </div>
 
-              <div className="flex gap-3">
+              <div className="grid grid-cols-3 gap-3">
                 <Button 
                   variant="outline" 
-                  size="lg" 
-                  className="flex-1"
+                  size="lg"
                   onClick={handleWishlistToggle}
                 >
                   <Heart className={`mr-2 h-5 w-5 ${isInWishlist(product.id) ? 'fill-red-500 text-red-500' : ''}`} />
-                  {isInWishlist(product.id) ? 'Remove from Wishlist' : 'Add to Wishlist'}
+                  Wishlist
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="lg"
+                  onClick={() => setShowRegistryDialog(true)}
+                >
+                  <Gift className="mr-2 h-5 w-5" />
+                  Registry
                 </Button>
                 <Button variant="outline" size="lg">
                   <Share2 className="h-5 w-5" />
                 </Button>
               </div>
+
+              {/* Personalization */}
+              {product.personalization_enabled && product.personalization_options && (
+                <div className="mt-6">
+                  <ProductPersonalization 
+                    options={product.personalization_options as any[]}
+                    onChange={setPersonalization}
+                  />
+                </div>
+              )}
 
               {/* Key Features */}
               <div className="mt-6 p-4 bg-muted rounded-lg">
@@ -227,6 +277,13 @@ const ProductDetail = () => {
               </div>
             </div>
           </div>
+
+          {/* Gift Registry Dialog */}
+          <GiftRegistryDialog 
+            open={showRegistryDialog}
+            onOpenChange={setShowRegistryDialog}
+            productId={product.id}
+          />
 
           {/* Product Details Tabs */}
           <Tabs defaultValue="description" className="mb-12">

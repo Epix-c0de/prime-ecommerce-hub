@@ -20,6 +20,10 @@ export interface Product {
   store_type: 'tech' | 'lifestyle';
   specifications: any;
   rating?: number;
+  model_url?: string | null;
+  ar_enabled?: boolean;
+  personalization_enabled?: boolean;
+  personalization_options?: any;
 }
 
 export interface ProductFilters {
