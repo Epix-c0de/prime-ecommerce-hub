@@ -11,11 +11,12 @@ import { Gift } from 'lucide-react';
 interface GiftRegistryDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  productId: string;
+  productId?: string;
 }
 
 export function GiftRegistryDialog({ open, onOpenChange, productId }: GiftRegistryDialogProps) {
   const { registries, createRegistry } = useGiftRegistry();
+  const isProductMode = !!productId;
   const [selectedRegistry, setSelectedRegistry] = useState<string>('');
   const [showNewRegistry, setShowNewRegistry] = useState(false);
   const [newRegistry, setNewRegistry] = useState({
@@ -44,12 +45,12 @@ export function GiftRegistryDialog({ open, onOpenChange, productId }: GiftRegist
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Gift className="w-5 h-5" />
-            Add to Gift Registry
+            {isProductMode ? 'Add to Gift Registry' : 'Create Gift Registry'}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
-          {!showNewRegistry ? (
+          {!showNewRegistry && isProductMode ? (
             <>
               {registries.length > 0 && (
                 <div className="space-y-2">
@@ -130,13 +131,15 @@ export function GiftRegistryDialog({ open, onOpenChange, productId }: GiftRegist
                 />
               </div>
 
-              <Button
-                variant="ghost"
-                className="w-full"
-                onClick={() => setShowNewRegistry(false)}
-              >
-                Back to Selection
-              </Button>
+              {isProductMode && (
+                <Button
+                  variant="ghost"
+                  className="w-full"
+                  onClick={() => setShowNewRegistry(false)}
+                >
+                  Back to Selection
+                </Button>
+              )}
             </div>
           )}
 
@@ -151,9 +154,9 @@ export function GiftRegistryDialog({ open, onOpenChange, productId }: GiftRegist
             <Button
               className="flex-1"
               onClick={handleAddToRegistry}
-              disabled={!selectedRegistry && !showNewRegistry}
+              disabled={isProductMode ? (!selectedRegistry && !showNewRegistry) : (!newRegistry.name || !newRegistry.event_type)}
             >
-              Add to Registry
+              {isProductMode ? 'Add to Registry' : 'Create Registry'}
             </Button>
           </div>
         </div>

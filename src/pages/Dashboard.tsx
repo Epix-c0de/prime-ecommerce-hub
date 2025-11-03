@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -11,8 +11,12 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useOrders } from "@/hooks/useOrders";
 import { useWishlist } from "@/hooks/useWishlist";
 import { useAddresses } from "@/hooks/useAddresses";
+import { useGiftRegistry } from "@/hooks/useGiftRegistry";
 import ProductCard from "@/components/ProductCard";
 import { useCart } from "@/hooks/useCart";
+import { GiftRegistryDialog } from "@/components/GiftRegistryDialog";
+import { Gift, Copy, ExternalLink } from "lucide-react";
+import { toast } from "sonner";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -20,7 +24,9 @@ const Dashboard = () => {
   const { orders } = useOrders();
   const { wishlistItems, removeFromWishlist } = useWishlist();
   const { addresses } = useAddresses();
+  const { registries, deleteRegistry } = useGiftRegistry();
   const { addToCart } = useCart();
+  const [showRegistryDialog, setShowRegistryDialog] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -31,6 +37,12 @@ const Dashboard = () => {
   const handleLogout = async () => {
     await signOut();
     navigate("/");
+  };
+
+  const copyRegistryLink = (shareCode: string) => {
+    const url = `${window.location.origin}/registry/${shareCode}`;
+    navigator.clipboard.writeText(url);
+    toast.success("Registry link copied to clipboard!");
   };
 
   if (loading || !user) {
@@ -66,9 +78,9 @@ const Dashboard = () => {
               <p className="text-2xl font-bold">{wishlistItems.length}</p>
             </Card>
             <Card className="p-6">
-              <MapPin className="h-8 w-8 text-primary mb-2" />
-              <h3 className="font-semibold mb-1">Saved Addresses</h3>
-              <p className="text-2xl font-bold">{addresses.length}</p>
+              <Gift className="h-8 w-8 text-primary mb-2" />
+              <h3 className="font-semibold mb-1">Gift Registries</h3>
+              <p className="text-2xl font-bold">{registries.length}</p>
             </Card>
             <Card className="p-6">
               <User className="h-8 w-8 text-primary mb-2" />
@@ -81,6 +93,7 @@ const Dashboard = () => {
             <TabsList>
               <TabsTrigger value="orders">Orders</TabsTrigger>
               <TabsTrigger value="wishlist">Wishlist</TabsTrigger>
+              <TabsTrigger value="registries">Gift Registries</TabsTrigger>
               <TabsTrigger value="addresses">Addresses</TabsTrigger>
               <TabsTrigger value="profile">Profile</TabsTrigger>
             </TabsList>
@@ -161,6 +174,81 @@ const Dashboard = () => {
               </Card>
             </TabsContent>
 
+            <TabsContent value="registries" className="mt-6">
+              <Card className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-bold">My Gift Registries</h2>
+                  <Button 
+                    className="bg-primary hover:bg-primary-hover"
+                    onClick={() => setShowRegistryDialog(true)}
+                  >
+                    <Gift className="mr-2 h-4 w-4" />
+                    Create Registry
+                  </Button>
+                </div>
+                {registries.length > 0 ? (
+                  <div className="space-y-4">
+                    {registries.map((registry) => (
+                      <div key={registry.id} className="p-4 border rounded-lg">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <h3 className="font-semibold text-lg">{registry.name}</h3>
+                              <Badge>{registry.event_type}</Badge>
+                              {registry.is_public && <Badge variant="outline">Public</Badge>}
+                            </div>
+                            {registry.event_date && (
+                              <p className="text-sm text-muted-foreground mb-2">
+                                Event Date: {new Date(registry.event_date).toLocaleDateString()}
+                              </p>
+                            )}
+                            {registry.description && (
+                              <p className="text-sm text-muted-foreground mb-3">
+                                {registry.description}
+                              </p>
+                            )}
+                            <div className="flex gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => copyRegistryLink(registry.share_code)}
+                              >
+                                <Copy className="mr-2 h-3 w-3" />
+                                Copy Link
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => window.open(`/registry/${registry.share_code}`, '_blank')}
+                              >
+                                <ExternalLink className="mr-2 h-3 w-3" />
+                                View Public Page
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => deleteRegistry(registry.id)}
+                              >
+                                Delete
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Gift className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <p className="text-muted-foreground mb-4">No gift registries yet</p>
+                    <Button onClick={() => setShowRegistryDialog(true)}>
+                      Create Your First Registry
+                    </Button>
+                  </div>
+                )}
+              </Card>
+            </TabsContent>
+
             <TabsContent value="addresses" className="mt-6">
               <Card className="p-6">
                 <div className="flex items-center justify-between mb-6">
@@ -219,6 +307,11 @@ const Dashboard = () => {
           </Tabs>
         </div>
       </main>
+
+      <GiftRegistryDialog 
+        open={showRegistryDialog}
+        onOpenChange={setShowRegistryDialog}
+      />
 
       <Footer />
     </div>
