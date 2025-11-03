@@ -31,6 +31,25 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      {/* Visit Lifestyle Store - Top Banner */}
+      <div className="bg-secondary text-white py-2 px-4">
+        <div className="container mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-sm">Looking for Lifestyle Products?</span>
+            <span className="hidden md:inline text-xs opacity-90">Fashion, beauty, toys, home décor & more!</span>
+          </div>
+          <Button
+            onClick={() => navigate("/lifestyle")}
+            variant="outline"
+            size="sm"
+            className="bg-white text-secondary hover:bg-white/90 border-0"
+          >
+            Visit Lifestyle Store
+            <ArrowRight className="ml-2 h-3 w-3" />
+          </Button>
+        </div>
+      </div>
+      
       <Header cartCount={cartCount} onCartClick={handleCartClick} storeType="tech" />
       
       <main className="flex-grow">
@@ -38,27 +57,6 @@ const Index = () => {
         <section className="bg-card">
           <div className="container mx-auto px-4 py-4">
             <HeroSlider />
-          </div>
-        </section>
-
-        {/* Visit Lifestyle Store CTA */}
-        <section className="bg-secondary/10 mt-4 border-y border-secondary/20">
-          <div className="container mx-auto px-4 py-4">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-              <div>
-                <h2 className="text-lg md:text-xl font-bold">Looking for Lifestyle Products?</h2>
-                <p className="text-muted-foreground text-sm">
-                  Fashion, beauty, toys, home décor & more!
-                </p>
-              </div>
-              <Button
-                onClick={() => navigate("/lifestyle")}
-                className="bg-secondary hover:bg-secondary-hover text-white px-6 py-2 flex items-center gap-2"
-              >
-                Visit Lifestyle Store
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </div>
           </div>
         </section>
 
