@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import ProductCard, { Product } from "./ProductCard";
+import ProductCard from "./ProductCard";
+import { Product } from "@/hooks/useProducts";
 import { ArrowRight } from "lucide-react";
 
 interface FlashSalesProps {
   products: Product[];
-  onAddToCart: (product: Product) => void;
+  onAddToCart: (productId: string) => void;
 }
 
 const FlashSales = ({ products, onAddToCart }: FlashSalesProps) => {
