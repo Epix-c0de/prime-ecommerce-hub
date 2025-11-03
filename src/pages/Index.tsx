@@ -1,26 +1,25 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import HeroSlider from "@/components/HeroSlider";
 import CategoryGrid from "@/components/CategoryGrid";
 import FlashSales from "@/components/FlashSales";
-import ProductCard, { Product } from "@/components/ProductCard";
+import ProductCard from "@/components/ProductCard";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { flashSaleProducts, popularProducts } from "@/lib/productData";
 import { ArrowRight } from "lucide-react";
+import { useProducts, useFlashSaleProducts } from "@/hooks/useProducts";
+import { useCart } from "@/hooks/useCart";
 
 const Index = () => {
   const navigate = useNavigate();
-  const [cartItems, setCartItems] = useState<Product[]>([]);
+  const { data: flashSaleProducts = [] } = useFlashSaleProducts('tech');
+  const { data: popularProducts = [] } = useProducts('tech', true);
+  const { cartItems, addToCart } = useCart();
 
-  const handleAddToCart = (product: Product) => {
-    setCartItems([...cartItems, product]);
-    toast.success("Item added to cart", {
-      description: product.name,
-    });
+  const handleAddToCart = (productId: string) => {
+    addToCart({ productId });
   };
 
   const handleCartClick = () => {

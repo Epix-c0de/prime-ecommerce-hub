@@ -7,29 +7,15 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Trash2, Plus, Minus, ShoppingBag } from "lucide-react";
 import { toast } from "sonner";
-import { flashSaleProducts } from "@/lib/productData";
+import { useCart } from "@/hooks/useCart";
 
 const Cart = () => {
   const navigate = useNavigate();
-  const [cartItems, setCartItems] = useState([
-    { ...flashSaleProducts[0], quantity: 1 },
-    { ...flashSaleProducts[1], quantity: 2 },
-  ]);
+  const { cartItems, updateQuantity, removeItem } = useCart();
   const [couponCode, setCouponCode] = useState("");
 
-  const updateQuantity = (id: number, delta: number) => {
-    setCartItems(items =>
-      items.map(item =>
-        item.id === id
-          ? { ...item, quantity: Math.max(1, item.quantity + delta) }
-          : item
-      )
-    );
-  };
-
-  const removeItem = (id: number) => {
-    setCartItems(items => items.filter(item => item.id !== id));
-    toast.success("Item removed from cart");
+  const handleRemove = (itemId: string) => {
+    removeItem(itemId);
   };
 
   const applyCoupon = () => {
@@ -38,7 +24,7 @@ const Cart = () => {
     }
   };
 
-  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const subtotal = cartItems.reduce((sum, item) => sum + (item.products?.price || 0) * item.quantity, 0);
   const shipping = subtotal > 5000 ? 0 : 500;
   const total = subtotal + shipping;
 
@@ -78,12 +64,12 @@ const Cart = () => {
                 <Card key={item.id} className="p-4">
                   <div className="flex gap-4">
                     <img
-                      src={item.image}
-                      alt={item.name}
+                      src={item.products?.images[0] || '/placeholder.svg'}
+                      alt={item.products?.name}
                       className="w-24 h-24 object-contain bg-muted rounded"
                     />
                     <div className="flex-grow">
-                      <h3 className="font-semibold mb-1">{item.name}</h3>
+                      <h3 className="font-semibold mb-1">{item.products?.name}</h3>
                       <p className="text-sm text-muted-foreground mb-2">
                         In Stock
                       </p>
@@ -93,7 +79,7 @@ const Cart = () => {
                             variant="outline"
                             size="icon"
                             className="h-8 w-8"
-                            onClick={() => updateQuantity(item.id, -1)}
+                            onClick={() => updateQuantity({ itemId: item.id, quantity: item.quantity - 1 })}
                           >
                             <Minus className="h-4 w-4" />
                           </Button>
@@ -104,17 +90,17 @@ const Cart = () => {
                             variant="outline"
                             size="icon"
                             className="h-8 w-8"
-                            onClick={() => updateQuantity(item.id, 1)}
+                            onClick={() => updateQuantity({ itemId: item.id, quantity: item.quantity + 1 })}
                           >
                             <Plus className="h-4 w-4" />
                           </Button>
                         </div>
                         <div className="text-right">
                           <p className="text-lg font-bold">
-                            KSh {(item.price * item.quantity).toLocaleString()}
+                            KSh {((item.products?.price || 0) * item.quantity).toLocaleString()}
                           </p>
                           <p className="text-sm text-muted-foreground">
-                            KSh {item.price.toLocaleString()} each
+                            KSh {item.products?.price.toLocaleString()} each
                           </p>
                         </div>
                       </div>
@@ -122,7 +108,7 @@ const Cart = () => {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => removeItem(item.id)}
+                      onClick={() => handleRemove(item.id)}
                       className="text-destructive hover:text-destructive"
                     >
                       <Trash2 className="h-5 w-5" />

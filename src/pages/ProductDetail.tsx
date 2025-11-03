@@ -7,24 +7,36 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Star, ShoppingCart, Heart, Share2, Minus, Plus } from "lucide-react";
 import { toast } from "sonner";
-import { flashSaleProducts, popularProducts } from "@/lib/productData";
-import ProductCard, { Product } from "@/components/ProductCard";
+import { useProductBySlug, useProducts } from "@/hooks/useProducts";
+import { useCart } from "@/hooks/useCart";
+import ProductCard from "@/components/ProductCard";
 
 const ProductDetail = () => {
-  const { id } = useParams();
+  const { slug } = useParams();
   const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
-  const [cartItems, setCartItems] = useState<Product[]>([]);
   const [selectedImage, setSelectedImage] = useState(0);
+  
+  const { data: product, isLoading } = useProductBySlug(slug || '');
+  const { data: allProducts = [] } = useProducts();
+  const { cartItems, addToCart } = useCart();
 
-  // Find product from both arrays
-  const allProducts = [...flashSaleProducts, ...popularProducts];
-  const product = allProducts.find(p => p.id === Number(id));
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Header cartCount={cartItems.length} onCartClick={() => navigate("/cart")} />
+        <div className="flex-grow flex items-center justify-center">
+          <div className="text-center">Loading...</div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   if (!product) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Header cartCount={0} onCartClick={() => {}} />
+        <Header cartCount={cartItems.length} onCartClick={() => navigate("/cart")} />
         <div className="flex-grow flex items-center justify-center">
           <div className="text-center">
             <h1 className="text-2xl font-bold mb-4">Product not found</h1>
@@ -37,10 +49,7 @@ const ProductDetail = () => {
   }
 
   const handleAddToCart = () => {
-    setCartItems([...cartItems, product]);
-    toast.success("Added to cart", {
-      description: `${quantity}x ${product.name}`,
-    });
+    addToCart({ productId: product.id, quantity });
   };
 
   const handleBuyNow = () => {
@@ -50,9 +59,11 @@ const ProductDetail = () => {
 
   const relatedProducts = allProducts.filter(p => p.id !== product.id).slice(0, 4);
 
-  const discountPercentage = product.originalPrice
-    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+  const discountPercentage = product.original_price
+    ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
     : 0;
+
+  const rating = product.rating || 4.5;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -74,13 +85,13 @@ const ProductDetail = () => {
             <div>
               <div className="bg-card rounded-lg p-4 mb-4">
                 <img
-                  src={product.image}
+                  src={product.images[selectedImage] || product.images[0] || '/placeholder.svg'}
                   alt={product.name}
                   className="w-full h-96 object-contain"
                 />
               </div>
               <div className="flex gap-2">
-                {[product.image, product.image, product.image].map((img, idx) => (
+                {product.images.slice(0, 3).map((img, idx) => (
                   <button
                     key={idx}
                     onClick={() => setSelectedImage(idx)}
@@ -105,7 +116,7 @@ const ProductDetail = () => {
                     <Star
                       key={i}
                       className={`h-4 w-4 ${
-                        i < Math.floor(product.rating)
+                        i < Math.floor(rating)
                           ? "fill-yellow-400 text-yellow-400"
                           : "fill-gray-200 text-gray-200"
                       }`}
@@ -113,7 +124,7 @@ const ProductDetail = () => {
                   ))}
                 </div>
                 <span className="text-sm text-muted-foreground">
-                  ({product.reviews} reviews)
+                  (0 reviews)
                 </span>
               </div>
 
@@ -123,10 +134,10 @@ const ProductDetail = () => {
                   <span className="text-3xl font-bold text-foreground">
                     KSh {product.price.toLocaleString()}
                   </span>
-                  {product.originalPrice && (
+                  {product.original_price && (
                     <>
                       <span className="text-xl text-muted-foreground line-through">
-                        KSh {product.originalPrice.toLocaleString()}
+                        KSh {product.original_price.toLocaleString()}
                       </span>
                       <Badge className="bg-destructive text-destructive-foreground">
                         -{discountPercentage}%
@@ -134,7 +145,9 @@ const ProductDetail = () => {
                     </>
                   )}
                 </div>
-                <p className="text-sm text-success">In Stock</p>
+                <p className="text-sm text-success">
+                  {product.stock > 0 ? 'In Stock' : 'Out of Stock'}
+                </p>
               </div>
 
               {/* Quantity Selector */}
@@ -199,40 +212,42 @@ const ProductDetail = () => {
 
           {/* Product Details Tabs */}
           <Tabs defaultValue="description" className="mb-12">
-            <TabsList className="w-full justify-start">
+              <TabsList className="w-full justify-start">
               <TabsTrigger value="description">Description</TabsTrigger>
               <TabsTrigger value="specifications">Specifications</TabsTrigger>
-              <TabsTrigger value="reviews">Reviews ({product.reviews})</TabsTrigger>
+              <TabsTrigger value="reviews">Reviews (0)</TabsTrigger>
               <TabsTrigger value="shipping">Shipping Info</TabsTrigger>
             </TabsList>
             <TabsContent value="description" className="bg-card p-6 rounded-lg mt-4">
               <h3 className="font-semibold text-lg mb-4">Product Description</h3>
               <p className="text-muted-foreground leading-relaxed">
-                {product.name} - Experience premium quality with this exceptional product.
+                {product.description || `${product.name} - Experience premium quality with this exceptional product.
                 Designed with the latest technology and built to last, this item offers
                 outstanding performance and reliability. Perfect for everyday use or
-                professional applications.
+                professional applications.`}
               </p>
             </TabsContent>
             <TabsContent value="specifications" className="bg-card p-6 rounded-lg mt-4">
               <h3 className="font-semibold text-lg mb-4">Technical Specifications</h3>
               <div className="grid md:grid-cols-2 gap-4">
-                <div className="border-b pb-2">
-                  <span className="text-muted-foreground">Brand:</span>
-                  <span className="float-right font-medium">Premium Brand</span>
-                </div>
-                <div className="border-b pb-2">
-                  <span className="text-muted-foreground">Model:</span>
-                  <span className="float-right font-medium">2024 Edition</span>
-                </div>
-                <div className="border-b pb-2">
-                  <span className="text-muted-foreground">Warranty:</span>
-                  <span className="float-right font-medium">1 Year</span>
-                </div>
-                <div className="border-b pb-2">
-                  <span className="text-muted-foreground">Weight:</span>
-                  <span className="float-right font-medium">Varies</span>
-                </div>
+                {product.brand && (
+                  <div className="border-b pb-2">
+                    <span className="text-muted-foreground">Brand:</span>
+                    <span className="float-right font-medium">{product.brand}</span>
+                  </div>
+                )}
+                {product.sku && (
+                  <div className="border-b pb-2">
+                    <span className="text-muted-foreground">SKU:</span>
+                    <span className="float-right font-medium">{product.sku}</span>
+                  </div>
+                )}
+                {product.specifications && Object.entries(product.specifications).map(([key, value]) => (
+                  <div key={key} className="border-b pb-2">
+                    <span className="text-muted-foreground">{key}:</span>
+                    <span className="float-right font-medium">{String(value)}</span>
+                  </div>
+                ))}
               </div>
             </TabsContent>
             <TabsContent value="reviews" className="bg-card p-6 rounded-lg mt-4">
@@ -255,13 +270,12 @@ const ProductDetail = () => {
           <div>
             <h2 className="text-2xl font-bold mb-6">Related Products</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {relatedProducts.map((product) => (
+              {relatedProducts.map((relatedProduct) => (
                 <ProductCard
-                  key={product.id}
-                  product={product}
-                  onAddToCart={(p) => {
-                    setCartItems([...cartItems, p]);
-                    toast.success("Added to cart");
+                  key={relatedProduct.id}
+                  product={relatedProduct}
+                  onAddToCart={(productId) => {
+                    addToCart({ productId });
                   }}
                 />
               ))}

@@ -1,90 +1,14 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import HeroSlider from "@/components/HeroSlider";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import ProductCard, { Product } from "@/components/ProductCard";
+import ProductCard from "@/components/ProductCard";
 import { toast } from "sonner";
 import { ArrowRight, Shirt, Gift, Sparkles, Home as HomeIcon, UtensilsCrossed, Bike } from "lucide-react";
-
-const lifestyleProducts: Product[] = [
-  {
-    id: 11,
-    name: "Men's Premium Cotton T-Shirt - Blue",
-    price: 1299,
-    originalPrice: 1999,
-    image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop",
-    rating: 4,
-    reviews: 156,
-    discount: 35,
-  },
-  {
-    id: 12,
-    name: "Women's Floral Summer Dress",
-    price: 2499,
-    originalPrice: 3999,
-    image: "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=400&h=400&fit=crop",
-    rating: 4.5,
-    reviews: 203,
-    discount: 38,
-  },
-  {
-    id: 13,
-    name: "Kids Remote Control Car Toy Set",
-    price: 3499,
-    image: "https://images.unsplash.com/photo-1558060370-d644479cb6f7?w=400&h=400&fit=crop",
-    rating: 5,
-    reviews: 89,
-  },
-  {
-    id: 14,
-    name: "Natural Glow Face Cream 50ml",
-    price: 1899,
-    originalPrice: 2499,
-    image: "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=400&h=400&fit=crop",
-    rating: 4.5,
-    reviews: 412,
-    discount: 24,
-  },
-  {
-    id: 15,
-    name: "Stainless Steel Cookware Set 12-Piece",
-    price: 8999,
-    originalPrice: 12999,
-    image: "https://images.unsplash.com/photo-1584990347449-39f1cf174e48?w=400&h=400&fit=crop",
-    rating: 5,
-    reviews: 167,
-    discount: 31,
-  },
-  {
-    id: 16,
-    name: "Mountain Bike 21-Speed Adult Bicycle",
-    price: 18999,
-    image: "https://images.unsplash.com/photo-1485965120184-e220f721d03e?w=400&h=400&fit=crop",
-    rating: 4,
-    reviews: 94,
-  },
-  {
-    id: 17,
-    name: "Designer Handbag - Brown Leather",
-    price: 4999,
-    originalPrice: 7999,
-    image: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=400&h=400&fit=crop",
-    rating: 4.5,
-    reviews: 278,
-    discount: 38,
-  },
-  {
-    id: 18,
-    name: "Premium Bed Sheet Set Queen Size",
-    price: 3499,
-    image: "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=400&h=400&fit=crop",
-    rating: 5,
-    reviews: 145,
-  },
-];
+import { useProducts } from "@/hooks/useProducts";
+import { useCart } from "@/hooks/useCart";
 
 const categories = [
   { name: "Fashion & Clothing", icon: Shirt, color: "text-pink-500" },
@@ -97,13 +21,11 @@ const categories = [
 
 const LifestyleStore = () => {
   const navigate = useNavigate();
-  const [cartItems, setCartItems] = useState<Product[]>([]);
+  const { data: lifestyleProducts = [] } = useProducts('lifestyle', true);
+  const { cartItems, addToCart } = useCart();
 
-  const handleAddToCart = (product: Product) => {
-    setCartItems([...cartItems, product]);
-    toast.success("Item added to cart", {
-      description: product.name,
-    });
+  const handleAddToCart = (productId: string) => {
+    addToCart({ productId });
   };
 
   return (
