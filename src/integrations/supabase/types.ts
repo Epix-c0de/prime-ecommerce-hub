@@ -174,6 +174,45 @@ export type Database = {
         }
         Relationships: []
       }
+      gift_registries: {
+        Row: {
+          created_at: string
+          description: string | null
+          event_date: string | null
+          event_type: string
+          id: string
+          is_public: boolean | null
+          name: string
+          share_code: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          event_date?: string | null
+          event_type: string
+          id?: string
+          is_public?: boolean | null
+          name: string
+          share_code: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          event_date?: string | null
+          event_type?: string
+          id?: string
+          is_public?: boolean | null
+          name?: string
+          share_code?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       order_items: {
         Row: {
           created_at: string | null
@@ -275,6 +314,7 @@ export type Database = {
       }
       products: {
         Row: {
+          ar_enabled: boolean | null
           brand: string | null
           category_id: string | null
           created_at: string | null
@@ -284,8 +324,11 @@ export type Database = {
           images: string[] | null
           is_featured: boolean | null
           is_flash_sale: boolean | null
+          model_url: string | null
           name: string
           original_price: number | null
+          personalization_enabled: boolean | null
+          personalization_options: Json | null
           price: number
           sku: string | null
           slug: string
@@ -296,6 +339,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          ar_enabled?: boolean | null
           brand?: string | null
           category_id?: string | null
           created_at?: string | null
@@ -305,8 +349,11 @@ export type Database = {
           images?: string[] | null
           is_featured?: boolean | null
           is_flash_sale?: boolean | null
+          model_url?: string | null
           name: string
           original_price?: number | null
+          personalization_enabled?: boolean | null
+          personalization_options?: Json | null
           price: number
           sku?: string | null
           slug: string
@@ -317,6 +364,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          ar_enabled?: boolean | null
           brand?: string | null
           category_id?: string | null
           created_at?: string | null
@@ -326,8 +374,11 @@ export type Database = {
           images?: string[] | null
           is_featured?: boolean | null
           is_flash_sale?: boolean | null
+          model_url?: string | null
           name?: string
           original_price?: number | null
+          personalization_enabled?: boolean | null
+          personalization_options?: Json | null
           price?: number
           sku?: string | null
           slug?: string
@@ -376,6 +427,54 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      registry_items: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          priority: string | null
+          product_id: string
+          quantity_purchased: number
+          quantity_requested: number
+          registry_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          priority?: string | null
+          product_id: string
+          quantity_purchased?: number
+          quantity_requested?: number
+          registry_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          priority?: string | null
+          product_id?: string
+          quantity_purchased?: number
+          quantity_requested?: number
+          registry_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "registry_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "registry_items_registry_id_fkey"
+            columns: ["registry_id"]
+            isOneToOne: false
+            referencedRelation: "gift_registries"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reviews: {
         Row: {
@@ -479,6 +578,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_share_code: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
