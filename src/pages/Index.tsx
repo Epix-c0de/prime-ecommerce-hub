@@ -18,7 +18,7 @@ import { ArrowRight } from "lucide-react";
 import { useProducts, useFlashSaleProducts } from "@/hooks/useProducts";
 import { useCart } from "@/hooks/useCart";
 import { Product } from "@/hooks/useProducts";
-import { usePrimeLinkSync } from "@/hooks/usePrimeLinkSync";
+import { useRealtimeSync } from "@/hooks/useRealtimeSync";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -28,8 +28,10 @@ const Index = () => {
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [quickViewOpen, setQuickViewOpen] = useState(false);
   
-  // Real-time sync with Admin Dashboard
-  const { isConnected, lastUpdate } = usePrimeLinkSync('tech');
+  // Real-time sync with Admin Dashboard (now using Supabase realtime)
+  const { isConnected, lastUpdate } = useRealtimeSync({
+    storeType: 'tech'
+  });
 
   const handleAddToCart = (productId: string) => {
     addToCart({ productId });
