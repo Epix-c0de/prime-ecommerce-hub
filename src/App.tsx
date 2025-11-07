@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
+import { ConfigProvider } from "./contexts/ConfigContext";
 import Index from "./pages/Index";
 import LifestyleStore from "./pages/LifestyleStore";
 import CategoryPage from "./pages/CategoryPage";
@@ -23,31 +24,33 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/lifestyle" element={<LifestyleStore />} />
-            <Route path="/category/:slug" element={<CategoryPage storeType="tech" />} />
-            <Route path="/lifestyle/category/:slug" element={<CategoryPage storeType="lifestyle" />} />
-            <Route path="/search" element={<SearchPage storeType="tech" />} />
-            <Route path="/lifestyle/search" element={<SearchPage storeType="lifestyle" />} />
-            <Route path="/product/:id" element={<ProductDetail />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/checkout" element={<Checkout />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/dashboard/orders" element={<Dashboard />} />
-            <Route path="/registry/:shareCode" element={<GiftRegistry />} />
-            <Route path="/style-quiz" element={<StyleQuiz />} />
-            <Route path="/outfit-matcher" element={<OutfitMatcher />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+      <ConfigProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/lifestyle" element={<LifestyleStore />} />
+              <Route path="/category/:slug" element={<CategoryPage storeType="tech" />} />
+              <Route path="/lifestyle/category/:slug" element={<CategoryPage storeType="lifestyle" />} />
+              <Route path="/search" element={<SearchPage storeType="tech" />} />
+              <Route path="/lifestyle/search" element={<SearchPage storeType="lifestyle" />} />
+              <Route path="/product/:id" element={<ProductDetail />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route path="/checkout" element={<Checkout />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/dashboard/orders" element={<Dashboard />} />
+              <Route path="/registry/:shareCode" element={<GiftRegistry />} />
+              <Route path="/style-quiz" element={<StyleQuiz />} />
+              <Route path="/outfit-matcher" element={<OutfitMatcher />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </ConfigProvider>
     </AuthProvider>
   </QueryClientProvider>
 );
