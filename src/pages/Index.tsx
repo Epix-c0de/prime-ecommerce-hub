@@ -7,6 +7,8 @@ import FlashSales from "@/components/FlashSales";
 import ProductCard from "@/components/ProductCard";
 import Footer from "@/components/Footer";
 import { PrimeBot } from "@/components/PrimeBot";
+import { AIChatbot } from "@/components/ai/AIChatbot";
+import { AIRecommendations } from "@/components/ai/AIRecommendations";
 import { QuickViewModal } from "@/components/QuickViewModal";
 import { RecentlyViewed } from "@/components/RecentlyViewed";
 import { BackToTop } from "@/components/BackToTop";
@@ -162,6 +164,13 @@ const Index = () => {
           </div>
         </section>
 
+        {/* AI Recommendations */}
+        <AIRecommendations 
+          products={popularProducts}
+          onAddToCart={handleAddToCart}
+          title="AI Recommendations Just for You"
+        />
+
         {/* Recently Viewed */}
         <RecentlyViewed onAddToCart={handleAddToCart} />
 
@@ -191,6 +200,7 @@ const Index = () => {
 
       <Footer />
       <PrimeBot storeType="tech" />
+      <AIChatbot products={popularProducts} />
       <BackToTop />
       
       <QuickViewModal

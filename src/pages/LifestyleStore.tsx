@@ -4,6 +4,8 @@ import Header from "@/components/Header";
 import HeroSlider from "@/components/HeroSlider";
 import Footer from "@/components/Footer";
 import { PrimeBot } from "@/components/PrimeBot";
+import { AIChatbot } from "@/components/ai/AIChatbot";
+import { AIRecommendations } from "@/components/ai/AIRecommendations";
 import { QuickViewModal } from "@/components/QuickViewModal";
 import { RecentlyViewed } from "@/components/RecentlyViewed";
 import { BackToTop } from "@/components/BackToTop";
@@ -160,6 +162,13 @@ const LifestyleStore = () => {
           </div>
         </section>
 
+        {/* AI Recommendations */}
+        <AIRecommendations 
+          products={lifestyleProducts}
+          onAddToCart={handleAddToCart}
+          title="Personalized Picks for Your Lifestyle"
+        />
+
         {/* Recently Viewed */}
         <RecentlyViewed onAddToCart={handleAddToCart} />
 
@@ -250,6 +259,7 @@ const LifestyleStore = () => {
 
       <Footer />
       <PrimeBot storeType="lifestyle" />
+      <AIChatbot products={lifestyleProducts} />
       <BackToTop />
       
       <QuickViewModal
