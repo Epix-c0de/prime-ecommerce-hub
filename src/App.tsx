@@ -18,6 +18,7 @@ import GiftRegistry from "./pages/GiftRegistry";
 import StyleQuiz from "./pages/StyleQuiz";
 import OutfitMatcher from "./pages/OutfitMatcher";
 import NotFound from "./pages/NotFound";
+import AdminControls from "./pages/AdminControls";
 
 const queryClient = new QueryClient();
 
@@ -42,11 +43,12 @@ const App = () => (
               <Route path="/auth" element={<Auth />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/dashboard/orders" element={<Dashboard />} />
-              <Route path="/registry/:shareCode" element={<GiftRegistry />} />
-              <Route path="/style-quiz" element={<StyleQuiz />} />
-              <Route path="/outfit-matcher" element={<OutfitMatcher />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
+            <Route path="/registry/:shareCode" element={<GiftRegistry />} />
+            <Route path="/style-quiz" element={<StyleQuiz />} />
+            <Route path="/outfit-matcher" element={<OutfitMatcher />} />
+            <Route path="/admin" element={<AdminControls />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
         </TooltipProvider>
