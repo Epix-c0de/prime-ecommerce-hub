@@ -1,4 +1,4 @@
-import { Palette, Settings, Sparkles, Store } from 'lucide-react';
+import { Palette, Settings, Sparkles, Store, LayoutDashboard, Bot, Activity, BarChart3 } from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
@@ -11,7 +11,7 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 
-type AdminSection = 'theme' | 'features' | 'seasonal' | 'store';
+type AdminSection = 'dashboard' | 'theme' | 'features' | 'seasonal' | 'store' | 'ai' | 'activity' | 'analytics';
 
 interface AdminSidebarProps {
   activeSection: AdminSection;
@@ -19,10 +19,14 @@ interface AdminSidebarProps {
 }
 
 const menuItems = [
+  { id: 'dashboard' as AdminSection, title: 'Dashboard', icon: LayoutDashboard },
   { id: 'theme' as AdminSection, title: 'Theme Settings', icon: Palette },
   { id: 'features' as AdminSection, title: 'Feature Toggles', icon: Settings },
   { id: 'seasonal' as AdminSection, title: 'Seasonal Modes', icon: Sparkles },
   { id: 'store' as AdminSection, title: 'Store Settings', icon: Store },
+  { id: 'ai' as AdminSection, title: 'AI Management', icon: Bot },
+  { id: 'analytics' as AdminSection, title: 'Analytics', icon: BarChart3 },
+  { id: 'activity' as AdminSection, title: 'Activity Feed', icon: Activity },
 ];
 
 export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarProps) {

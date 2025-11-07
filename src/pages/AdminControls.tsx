@@ -5,17 +5,23 @@ import { ThemeControls } from '@/components/admin/ThemeControls';
 import { FeatureToggles } from '@/components/admin/FeatureToggles';
 import { SeasonalModeControl } from '@/components/admin/SeasonalModeControl';
 import { StoreSettings } from '@/components/admin/StoreSettings';
+import { DashboardOverview } from '@/components/admin/DashboardOverview';
+import { AISettings } from '@/components/admin/AISettings';
+import { ActivityFeed } from '@/components/admin/ActivityFeed';
+import { Analytics } from '@/components/admin/Analytics';
 import { SyncStatus } from '@/components/SyncStatus';
 import { useConfig } from '@/contexts/ConfigContext';
 
-type AdminSection = 'theme' | 'features' | 'seasonal' | 'store';
+type AdminSection = 'dashboard' | 'theme' | 'features' | 'seasonal' | 'store' | 'ai' | 'activity' | 'analytics';
 
 const AdminControls = () => {
-  const [activeSection, setActiveSection] = useState<AdminSection>('theme');
+  const [activeSection, setActiveSection] = useState<AdminSection>('dashboard');
   const { isConnected, lastUpdate } = useConfig();
 
   const renderSection = () => {
     switch (activeSection) {
+      case 'dashboard':
+        return <DashboardOverview />;
       case 'theme':
         return <ThemeControls />;
       case 'features':
@@ -24,8 +30,14 @@ const AdminControls = () => {
         return <SeasonalModeControl />;
       case 'store':
         return <StoreSettings />;
+      case 'ai':
+        return <AISettings />;
+      case 'analytics':
+        return <Analytics />;
+      case 'activity':
+        return <ActivityFeed />;
       default:
-        return <ThemeControls />;
+        return <DashboardOverview />;
     }
   };
 
