@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { ThemeControls } from '@/components/admin/ThemeControls';
@@ -11,12 +12,50 @@ import { ActivityFeed } from '@/components/admin/ActivityFeed';
 import { Analytics } from '@/components/admin/Analytics';
 import { SyncStatus } from '@/components/SyncStatus';
 import { useConfig } from '@/contexts/ConfigContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useUserRole } from '@/hooks/useUserRole';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle, Loader2 } from 'lucide-react';
 
 type AdminSection = 'dashboard' | 'theme' | 'features' | 'seasonal' | 'store' | 'ai' | 'activity' | 'analytics';
 
 const AdminControls = () => {
   const [activeSection, setActiveSection] = useState<AdminSection>('dashboard');
   const { isConnected, lastUpdate } = useConfig();
+  const { user, loading: authLoading } = useAuth();
+  const { role, loading: roleLoading, isAdmin } = useUserRole();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate('/auth');
+    }
+  }, [user, authLoading, navigate]);
+
+  if (authLoading || roleLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-6">
+        <Alert variant="destructive" className="max-w-md">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            You don't have permission to access the admin dashboard. Please contact an administrator.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
 
   const renderSection = () => {
     switch (activeSection) {
