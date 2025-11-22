@@ -11,6 +11,7 @@ import { AISettings } from '@/components/admin/AISettings';
 import { ActivityFeed } from '@/components/admin/ActivityFeed';
 import { Analytics } from '@/components/admin/Analytics';
 import { UserRoleManagement } from '@/components/admin/UserRoleManagement';
+import { ThemeStudio } from '@/components/admin/ThemeStudio';
 import { ProductManagement } from '@/components/admin/ProductManagement';
 import { CategoryManagement } from '@/components/admin/CategoryManagement';
 import { OrderManagement } from '@/components/admin/OrderManagement';
@@ -21,7 +22,7 @@ import { useUserRole } from '@/hooks/useUserRole';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle, Loader2 } from 'lucide-react';
 
-type AdminSection = 'dashboard' | 'theme' | 'features' | 'seasonal' | 'store' | 'ai' | 'activity' | 'analytics' | 'products' | 'categories' | 'orders' | 'roles';
+type AdminSection = 'dashboard' | 'theme' | 'features' | 'seasonal' | 'store' | 'ai' | 'activity' | 'analytics' | 'products' | 'categories' | 'orders' | 'roles' | 'theme-studio';
 
 const AdminControls = () => {
   const [activeSection, setActiveSection] = useState<AdminSection>('dashboard');
@@ -89,6 +90,8 @@ const AdminControls = () => {
         return <OrderManagement />;
       case 'roles':
         return <UserRoleManagement />;
+      case 'theme-studio':
+        return <ThemeStudio />;
       default:
         return <DashboardOverview />;
     }
