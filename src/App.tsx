@@ -20,6 +20,8 @@ import StyleQuiz from "./pages/StyleQuiz";
 import OutfitMatcher from "./pages/OutfitMatcher";
 import NotFound from "./pages/NotFound";
 import AdminControls from "./pages/AdminControls";
+import MultiStoreAdmin from "./pages/MultiStoreAdmin";
+import CMSPage from "./pages/CMSPage";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +51,8 @@ const App = () => (
               <Route path="/style-quiz" element={<StyleQuiz />} />
               <Route path="/outfit-matcher" element={<OutfitMatcher />} />
               <Route path="/admin" element={<AdminControls />} />
+              <Route path="/admin/multi-store" element={<MultiStoreAdmin />} />
+              <Route path="/page/:slug" element={<CMSPage />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
               </Routes>

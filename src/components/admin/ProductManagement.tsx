@@ -11,8 +11,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Edit, Trash2, Image as ImageIcon, Loader2, Info } from 'lucide-react';
+import { Plus, Edit, Trash2, Image as ImageIcon, Loader2, Info, Boxes } from 'lucide-react';
 import { ModelUploadGuide } from './ModelUploadGuide';
+import { ProductVariantManager } from './ProductVariantManager';
 
 interface Product {
   id: string;
@@ -48,6 +49,7 @@ export function ProductManagement() {
   const [loading, setLoading] = useState(true);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [variantProduct, setVariantProduct] = useState<Product | null>(null);
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -486,6 +488,14 @@ export function ProductManagement() {
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      onClick={() => setVariantProduct(product)}
+                      title="Manage Variants"
+                    >
+                      <Boxes className="h-4 w-4" />
+                    </Button>
                     <Button size="sm" variant="outline" onClick={() => handleEdit(product)}>
                       <Edit className="h-4 w-4" />
                     </Button>
@@ -499,6 +509,21 @@ export function ProductManagement() {
           </TableBody>
         </Table>
       </CardContent>
+      
+      {/* Variant Manager Dialog */}
+      {variantProduct && (
+        <Dialog open={!!variantProduct} onOpenChange={(open) => !open && setVariantProduct(null)}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Product Variants</DialogTitle>
+            </DialogHeader>
+            <ProductVariantManager 
+              productId={variantProduct.id} 
+              productName={variantProduct.name}
+            />
+          </DialogContent>
+        </Dialog>
+      )}
       
       {/* 3D Model & AR Guide */}
       <ModelUploadGuide />
