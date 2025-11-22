@@ -10,6 +10,8 @@ import { DashboardOverview } from '@/components/admin/DashboardOverview';
 import { AISettings } from '@/components/admin/AISettings';
 import { ActivityFeed } from '@/components/admin/ActivityFeed';
 import { Analytics } from '@/components/admin/Analytics';
+import { ProductManagement } from '@/components/admin/ProductManagement';
+import { CategoryManagement } from '@/components/admin/CategoryManagement';
 import { SyncStatus } from '@/components/SyncStatus';
 import { useConfig } from '@/contexts/ConfigContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -17,7 +19,7 @@ import { useUserRole } from '@/hooks/useUserRole';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle, Loader2 } from 'lucide-react';
 
-type AdminSection = 'dashboard' | 'theme' | 'features' | 'seasonal' | 'store' | 'ai' | 'activity' | 'analytics';
+type AdminSection = 'dashboard' | 'theme' | 'features' | 'seasonal' | 'store' | 'ai' | 'activity' | 'analytics' | 'products' | 'categories';
 
 const AdminControls = () => {
   const [activeSection, setActiveSection] = useState<AdminSection>('dashboard');
@@ -75,6 +77,10 @@ const AdminControls = () => {
         return <Analytics />;
       case 'activity':
         return <ActivityFeed />;
+      case 'products':
+        return <ProductManagement />;
+      case 'categories':
+        return <CategoryManagement />;
       default:
         return <DashboardOverview />;
     }
