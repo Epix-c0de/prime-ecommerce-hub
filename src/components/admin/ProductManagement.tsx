@@ -11,7 +11,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Edit, Trash2, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { Plus, Edit, Trash2, Image as ImageIcon, Loader2, Info } from 'lucide-react';
+import { ModelUploadGuide } from './ModelUploadGuide';
 
 interface Product {
   id: string;
@@ -498,6 +499,9 @@ export function ProductManagement() {
           </TableBody>
         </Table>
       </CardContent>
+      
+      {/* 3D Model & AR Guide */}
+      <ModelUploadGuide />
     </Card>
   );
 }
