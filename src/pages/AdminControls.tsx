@@ -15,6 +15,7 @@ import { ThemeStudio } from '@/components/admin/ThemeStudio';
 import { ProductManagement } from '@/components/admin/ProductManagement';
 import { CategoryManagement } from '@/components/admin/CategoryManagement';
 import { OrderManagement } from '@/components/admin/OrderManagement';
+import { PageManagement } from '@/components/admin/PageManagement';
 import { SyncStatus } from '@/components/SyncStatus';
 import { useConfig } from '@/contexts/ConfigContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -22,7 +23,7 @@ import { useUserRole } from '@/hooks/useUserRole';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle, Loader2 } from 'lucide-react';
 
-type AdminSection = 'dashboard' | 'theme' | 'features' | 'seasonal' | 'store' | 'ai' | 'activity' | 'analytics' | 'products' | 'categories' | 'orders' | 'roles' | 'theme-studio';
+type AdminSection = 'dashboard' | 'theme' | 'features' | 'seasonal' | 'store' | 'ai' | 'activity' | 'analytics' | 'products' | 'categories' | 'orders' | 'roles' | 'theme-studio' | 'pages';
 
 const AdminControls = () => {
   const [activeSection, setActiveSection] = useState<AdminSection>('dashboard');
@@ -92,6 +93,8 @@ const AdminControls = () => {
         return <UserRoleManagement />;
       case 'theme-studio':
         return <ThemeStudio />;
+      case 'pages':
+        return <PageManagement />;
       default:
         return <DashboardOverview />;
     }

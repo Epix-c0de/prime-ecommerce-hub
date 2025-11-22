@@ -1,4 +1,4 @@
-import { Palette, Settings, Sparkles, Store, LayoutDashboard, Bot, Activity, BarChart3, Package, FolderTree, ShoppingCart, Shield, Boxes, Layout } from 'lucide-react';
+import { Palette, Settings, Sparkles, Store, LayoutDashboard, Bot, Activity, BarChart3, Package, FolderTree, ShoppingCart, Shield, Boxes, Layout, FileText } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import {
   Sidebar,
@@ -12,7 +12,7 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 
-type AdminSection = 'dashboard' | 'theme' | 'features' | 'seasonal' | 'store' | 'ai' | 'activity' | 'analytics' | 'products' | 'categories' | 'orders' | 'roles' | 'theme-studio';
+type AdminSection = 'dashboard' | 'theme' | 'features' | 'seasonal' | 'store' | 'ai' | 'activity' | 'analytics' | 'products' | 'categories' | 'orders' | 'roles' | 'theme-studio' | 'pages';
 
 interface AdminSidebarProps {
   activeSection: AdminSection;
@@ -24,6 +24,7 @@ const menuItems = [
   { id: 'orders' as AdminSection, title: 'Orders', icon: ShoppingCart },
   { id: 'products' as AdminSection, title: 'Products', icon: Package },
   { id: 'categories' as AdminSection, title: 'Categories', icon: FolderTree },
+  { id: 'pages' as AdminSection, title: 'Content Pages', icon: FileText },
   { id: 'roles' as AdminSection, title: 'User Roles', icon: Shield },
   { id: 'theme-studio' as AdminSection, title: 'Theme Studio', icon: Palette },
   { id: 'theme' as AdminSection, title: 'Quick Themes', icon: Palette },
