@@ -8,7 +8,8 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   signUp: (email: string, password: string, metadata: any) => Promise<{ error: any }>;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
+  signIn: (emailOrUsername: string, password: string) => Promise<{ error: any }>;
+  signInWithGoogle: () => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: any }>;
 }
@@ -66,22 +67,71 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (emailOrUsername: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      // Check if input is email format
+      const isEmail = emailOrUsername.includes('@');
+      
+      if (isEmail) {
+        // Direct email login
+        const { error } = await supabase.auth.signInWithPassword({
+          email: emailOrUsername,
+          password,
+        });
+        
+        if (error) {
+          toast.error(error.message);
+        } else {
+          toast.success("Welcome back!");
+        }
+        
+        return { error };
+      } else {
+        // Username login - lookup email first
+        const { data: userData, error: lookupError } = await supabase
+          .rpc('get_user_by_username_or_email', { identifier: emailOrUsername });
+        
+        if (lookupError || !userData || userData.length === 0) {
+          toast.error("Invalid username or password");
+          return { error: new Error("User not found") };
+        }
+        
+        const userEmail = userData[0].email;
+        const { error } = await supabase.auth.signInWithPassword({
+          email: userEmail,
+          password,
+        });
+        
+        if (error) {
+          toast.error(error.message);
+        } else {
+          toast.success("Welcome back!");
+        }
+        
+        return { error };
+      }
+    } catch (error: any) {
+      toast.error("An error occurred during sign in");
+      return { error };
+    }
+  };
+
+  const signInWithGoogle = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/`,
+        }
       });
       
       if (error) {
         toast.error(error.message);
-      } else {
-        toast.success("Welcome back!");
       }
       
       return { error };
     } catch (error: any) {
-      toast.error("An error occurred during sign in");
+      toast.error("An error occurred during Google sign in");
       return { error };
     }
   };
@@ -126,6 +176,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         loading,
         signUp,
         signIn,
+        signInWithGoogle,
         signOut,
         resetPassword,
       }}

@@ -2,22 +2,38 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { signUpSchema, signInSchema, resetPasswordSchema } from "@/lib/validation";
+import { Facebook, Instagram, Linkedin } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const Auth = () => {
   const navigate = useNavigate();
-  const { signIn, signUp, resetPassword, user } = useAuth();
+  const { signIn, signUp, signInWithGoogle, resetPassword, user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [showResetPassword, setShowResetPassword] = useState(false);
   const [isRegisterMode, setIsRegisterMode] = useState(false);
 
   useEffect(() => {
-    if (user) {
-      navigate("/dashboard");
-    }
+    const checkUserRole = async () => {
+      if (user) {
+        // Check if user has admin role
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .single();
+
+        if (roleData?.role === 'super_admin' || roleData?.role === 'admin') {
+          navigate("/admin");
+        } else {
+          navigate("/dashboard");
+        }
+      }
+    };
+    
+    checkUserRole();
   }, [user, navigate]);
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -25,24 +41,30 @@ const Auth = () => {
     setIsLoading(true);
     
     const formData = new FormData(e.currentTarget);
-    const email = formData.get("email") as string;
+    const emailOrUsername = formData.get("emailOrUsername") as string;
     const password = formData.get("password") as string;
 
-    const validation = signInSchema.safeParse({ email, password });
-    if (!validation.success) {
-      const firstError = validation.error.errors[0];
-      toast.error(firstError.message);
+    // Basic validation for empty fields
+    if (!emailOrUsername || !password) {
+      toast.error("Please fill in all fields");
       setIsLoading(false);
       return;
     }
 
-    const { error } = await signIn(email, password);
+    const { error } = await signIn(emailOrUsername, password);
     
     setIsLoading(false);
     
-    if (!error) {
-      navigate("/dashboard");
+    if (error) {
+      // Error is already shown by signIn function
+      return;
     }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setIsLoading(true);
+    await signInWithGoogle();
+    setIsLoading(false);
   };
 
   const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -81,8 +103,8 @@ const Auth = () => {
     
     setIsLoading(false);
     
-    if (!error) {
-      navigate("/dashboard");
+    if (error) {
+      return;
     }
   };
 
@@ -110,7 +132,7 @@ const Auth = () => {
   if (showResetPassword) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
-        <div className="w-full max-w-md bg-card rounded-3xl shadow-lg p-8">
+        <div className="w-full max-w-md bg-card rounded-3xl shadow-lg p-8 animate-scale-in">
           <div className="text-center mb-6">
             <h1 className="text-2xl font-bold text-foreground">Reset Password</h1>
             <p className="text-muted-foreground mt-2">
@@ -152,33 +174,41 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <div className="w-full max-w-[900px] h-[520px] flex rounded-3xl overflow-hidden shadow-2xl bg-card">
+      <div className="w-full max-w-[900px] h-[520px] flex rounded-3xl overflow-hidden shadow-2xl bg-card animate-scale-in">
         {/* Left Side - Welcome / Toggle */}
-        <div className={`w-1/2 bg-primary text-primary-foreground flex flex-col justify-center items-center px-10 transition-all duration-300 ${isRegisterMode ? 'order-2' : 'order-1'}`}>
-          <h1 className="text-4xl font-bold mb-4">
+        <div 
+          className={`w-1/2 bg-primary text-primary-foreground flex flex-col justify-center items-center px-10 transition-all duration-500 ease-in-out ${
+            isRegisterMode ? 'order-2' : 'order-1'
+          }`}
+        >
+          <h1 className="text-4xl font-bold mb-4 animate-fade-in">
             {isRegisterMode ? "Welcome Back!" : "Hello, Welcome!"}
           </h1>
-          <p className="text-lg mb-6 text-center">
+          <p className="text-lg mb-6 text-center animate-fade-in">
             {isRegisterMode ? "Already have an account?" : "Don't have an account?"}
           </p>
           <Button
             onClick={() => setIsRegisterMode(!isRegisterMode)}
-            className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 rounded-xl px-6 py-3"
+            className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 rounded-xl px-6 py-3 hover-scale"
           >
             {isRegisterMode ? "Login" : "Register"}
           </Button>
         </div>
 
         {/* Right Side - Forms */}
-        <div className={`w-1/2 bg-card flex flex-col justify-center px-10 py-8 transition-all duration-300 ${isRegisterMode ? 'order-1' : 'order-2'}`}>
+        <div 
+          className={`w-1/2 bg-card flex flex-col justify-center px-10 py-8 transition-all duration-500 ease-in-out ${
+            isRegisterMode ? 'order-1' : 'order-2'
+          }`}
+        >
           {!isRegisterMode ? (
-            <>
+            <div className="animate-fade-in">
               <h2 className="text-2xl font-bold text-foreground mb-6">Login</h2>
               <form onSubmit={handleLogin} className="space-y-4">
                 <Input
-                  name="email"
-                  type="email"
-                  placeholder="Email"
+                  name="emailOrUsername"
+                  type="text"
+                  placeholder="Email or Username"
                   className="w-full rounded-xl border-input"
                   required
                 />
@@ -188,6 +218,7 @@ const Auth = () => {
                   placeholder="Password"
                   className="w-full rounded-xl border-input"
                   required
+                  minLength={4}
                 />
                 <button
                   type="button"
@@ -207,23 +238,34 @@ const Auth = () => {
                   or login with social platforms
                 </p>
                 <div className="flex justify-center gap-3 mt-4">
-                  <button type="button" className="w-10 h-10 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center text-foreground font-semibold">
-                    G
+                  <button 
+                    type="button" 
+                    onClick={handleGoogleSignIn}
+                    disabled={isLoading}
+                    className="w-10 h-10 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center text-foreground font-semibold hover-scale transition-transform"
+                    aria-label="Sign in with Google"
+                  >
+                    <svg className="w-5 h-5" viewBox="0 0 24 24">
+                      <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                      <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                      <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                      <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
                   </button>
-                  <button type="button" className="w-10 h-10 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center text-foreground font-semibold">
-                    F
+                  <button type="button" className="w-10 h-10 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center hover-scale transition-transform" aria-label="Sign in with Facebook">
+                    <Facebook className="w-5 h-5 text-foreground" />
                   </button>
-                  <button type="button" className="w-10 h-10 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center text-foreground font-semibold">
-                    I
+                  <button type="button" className="w-10 h-10 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center hover-scale transition-transform" aria-label="Sign in with Instagram">
+                    <Instagram className="w-5 h-5 text-foreground" />
                   </button>
-                  <button type="button" className="w-10 h-10 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center text-foreground font-semibold">
-                    L
+                  <button type="button" className="w-10 h-10 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center hover-scale transition-transform" aria-label="Sign in with LinkedIn">
+                    <Linkedin className="w-5 h-5 text-foreground" />
                   </button>
                 </div>
               </form>
-            </>
+            </div>
           ) : (
-            <>
+            <div className="animate-fade-in">
               <h2 className="text-2xl font-bold text-foreground mb-6">Register</h2>
               <form onSubmit={handleSignup} className="space-y-3">
                 <div className="grid grid-cols-2 gap-3">
@@ -277,7 +319,7 @@ const Auth = () => {
                   {isLoading ? "Creating account..." : "Register"}
                 </Button>
               </form>
-            </>
+            </div>
           )}
         </div>
       </div>
