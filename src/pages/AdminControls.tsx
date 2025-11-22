@@ -10,6 +10,7 @@ import { DashboardOverview } from '@/components/admin/DashboardOverview';
 import { AISettings } from '@/components/admin/AISettings';
 import { ActivityFeed } from '@/components/admin/ActivityFeed';
 import { Analytics } from '@/components/admin/Analytics';
+import { UserRoleManagement } from '@/components/admin/UserRoleManagement';
 import { ProductManagement } from '@/components/admin/ProductManagement';
 import { CategoryManagement } from '@/components/admin/CategoryManagement';
 import { OrderManagement } from '@/components/admin/OrderManagement';
@@ -20,13 +21,13 @@ import { useUserRole } from '@/hooks/useUserRole';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle, Loader2 } from 'lucide-react';
 
-type AdminSection = 'dashboard' | 'theme' | 'features' | 'seasonal' | 'store' | 'ai' | 'activity' | 'analytics' | 'products' | 'categories' | 'orders';
+type AdminSection = 'dashboard' | 'theme' | 'features' | 'seasonal' | 'store' | 'ai' | 'activity' | 'analytics' | 'products' | 'categories' | 'orders' | 'roles';
 
 const AdminControls = () => {
   const [activeSection, setActiveSection] = useState<AdminSection>('dashboard');
   const { isConnected, lastUpdate } = useConfig();
   const { user, loading: authLoading } = useAuth();
-  const { role, loading: roleLoading, isAdmin } = useUserRole();
+  const { role, loading: roleLoading, isAdmin, isSuperAdmin } = useUserRole();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -53,7 +54,9 @@ const AdminControls = () => {
         <Alert variant="destructive" className="max-w-md">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            You don't have permission to access the admin dashboard. Please contact an administrator.
+            {user?.email === 'epixshots001@gmail.com' 
+              ? 'Loading super admin privileges...' 
+              : 'You don\'t have permission to access the admin dashboard. Only the super administrator can access this area.'}
           </AlertDescription>
         </Alert>
       </div>
@@ -84,6 +87,8 @@ const AdminControls = () => {
         return <CategoryManagement />;
       case 'orders':
         return <OrderManagement />;
+      case 'roles':
+        return <UserRoleManagement />;
       default:
         return <DashboardOverview />;
     }
