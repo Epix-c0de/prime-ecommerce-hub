@@ -15,7 +15,7 @@ import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import { useComparison } from "@/hooks/useComparison";
 import ProductCard from "@/components/ProductCard";
 import { Product3DViewer } from "@/components/Product3DViewer";
-import { ARViewer } from "@/components/ARViewer";
+import { ARQuickView } from "@/components/ARQuickView";
 import { ProductPersonalization } from "@/components/ProductPersonalization";
 import { GiftRegistryDialog } from "@/components/GiftRegistryDialog";
 import { CompleteTheSet } from "@/components/CompleteTheSet";
@@ -30,6 +30,7 @@ const ProductDetail = () => {
   const [showRegistryDialog, setShowRegistryDialog] = useState(false);
   const [personalization, setPersonalization] = useState<Record<string, any>>({});
   const [show3D, setShow3D] = useState(false);
+  const [showARModal, setShowARModal] = useState(false);
   
   const { data: product, isLoading } = useProductBySlug(slug || '');
   const { data: allProducts = [] } = useProducts();
@@ -118,15 +119,28 @@ const ProductDetail = () => {
           <div className="grid md:grid-cols-2 gap-8 mb-12">
             {/* Product Images & 3D/AR */}
             <div className="space-y-4">
-              <div className="bg-card rounded-lg p-4">
+              <div className="bg-card rounded-lg p-4 relative">
                 {show3D && product.model_url ? (
-                  <Product3DViewer modelUrl={product.model_url} productName={product.name} />
+                  <Product3DViewer 
+                    modelUrl={product.model_url} 
+                    productName={product.name}
+                    arEnabled={product.ar_enabled || false}
+                  />
                 ) : (
                   <img
                     src={product.images[selectedImage] || product.images[0] || '/placeholder.svg'}
                     alt={product.name}
                     className="w-full h-96 object-contain"
                   />
+                )}
+                
+                {/* 3D/AR Badge */}
+                {product.model_url && (
+                  <div className="absolute top-6 left-6 z-10">
+                    <Badge variant="secondary" className="bg-primary/90 backdrop-blur-sm text-primary-foreground">
+                      3D Model Available
+                    </Badge>
+                  </div>
                 )}
               </div>
               
@@ -138,7 +152,7 @@ const ProductDetail = () => {
                       setSelectedImage(idx);
                       setShow3D(false);
                     }}
-                    className={`bg-card rounded-lg p-2 flex-1 ${
+                    className={`bg-card rounded-lg p-2 flex-1 transition-all hover:ring-2 hover:ring-primary/50 ${
                       selectedImage === idx && !show3D ? "ring-2 ring-primary" : ""
                     }`}
                   >
@@ -148,21 +162,27 @@ const ProductDetail = () => {
                 {product.model_url && (
                   <button
                     onClick={() => setShow3D(!show3D)}
-                    className={`bg-card rounded-lg p-2 flex-1 flex items-center justify-center ${
+                    className={`bg-card rounded-lg p-2 flex-1 flex items-center justify-center transition-all hover:ring-2 hover:ring-primary/50 ${
                       show3D ? "ring-2 ring-primary" : ""
                     }`}
+                    title="View 3D Model"
                   >
                     <Eye className="w-6 h-6 text-primary" />
                   </button>
                 )}
               </div>
 
-              {product.ar_enabled && (
-                <ARViewer 
-                  modelUrl={product.model_url}
-                  productName={product.name}
-                  productImage={product.images[0] || '/placeholder.svg'}
-                />
+              {/* AR Quick View Button */}
+              {product.ar_enabled && product.model_url && (
+                <Button
+                  onClick={() => setShowARModal(true)}
+                  variant="outline"
+                  className="w-full"
+                  size="lg"
+                >
+                  <Eye className="mr-2 h-5 w-5" />
+                  View in 3D & AR
+                </Button>
               )}
             </div>
 
@@ -434,6 +454,17 @@ const ProductDetail = () => {
           onClear={clearComparison}
           onAddToCart={(productId) => addToCart({ productId })}
         />
+
+        {/* AR Quick View Modal */}
+        {product.model_url && (
+          <ARQuickView
+            open={showARModal}
+            onOpenChange={setShowARModal}
+            modelUrl={product.model_url}
+            productName={product.name}
+            productUrl={window.location.href}
+          />
+        )}
       </main>
 
       <Footer />
