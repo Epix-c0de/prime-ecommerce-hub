@@ -9,11 +9,11 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-bold mb-4">About Us</h3>
             <ul className="space-y-2 text-gray-300">
-              <li><a href="#" className="hover:text-primary transition">About Prime Enterprises</a></li>
-              <li><a href="#" className="hover:text-primary transition">Careers</a></li>
-              <li><a href="#" className="hover:text-primary transition">Corporate Responsibility</a></li>
-              <li><a href="#" className="hover:text-primary transition">Press Center</a></li>
-              <li><a href="#" className="hover:text-primary transition">Become a Seller</a></li>
+              <li><a href="/page/about-us" className="hover:text-primary transition">About Prime Enterprises</a></li>
+              <li><a href="/page/careers" className="hover:text-primary transition">Careers</a></li>
+              <li><a href="/page/corporate-responsibility" className="hover:text-primary transition">Corporate Responsibility</a></li>
+              <li><a href="/page/press-center" className="hover:text-primary transition">Press Center</a></li>
+              <li><a href="/page/become-seller" className="hover:text-primary transition">Become a Seller</a></li>
             </ul>
           </div>
           
@@ -21,11 +21,11 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-bold mb-4">Customer Service</h3>
             <ul className="space-y-2 text-gray-300">
-              <li><a href="#" className="hover:text-primary transition">Help Center</a></li>
-              <li><a href="#" className="hover:text-primary transition">Return Policy</a></li>
-              <li><a href="#" className="hover:text-primary transition">Shipping Info</a></li>
-              <li><a href="#" className="hover:text-primary transition">Order Tracking</a></li>
-              <li><a href="#" className="hover:text-primary transition">Contact Us</a></li>
+              <li><a href="/page/help-center" className="hover:text-primary transition">Help Center</a></li>
+              <li><a href="/page/return-policy" className="hover:text-primary transition">Return Policy</a></li>
+              <li><a href="/page/shipping-info" className="hover:text-primary transition">Shipping Info</a></li>
+              <li><a href="/page/order-tracking" className="hover:text-primary transition">Order Tracking</a></li>
+              <li><a href="/page/contact-us" className="hover:text-primary transition">Contact Us</a></li>
             </ul>
           </div>
           
@@ -33,11 +33,11 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-bold mb-4">Payment & Delivery</h3>
             <ul className="space-y-2 text-gray-300">
-              <li><a href="#" className="hover:text-primary transition">Payment Methods</a></li>
-              <li><a href="#" className="hover:text-primary transition">Buy Now, Pay Later</a></li>
-              <li><a href="#" className="hover:text-primary transition">Shipping Options</a></li>
-              <li><a href="#" className="hover:text-primary transition">Delivery Tracking</a></li>
-              <li><a href="#" className="hover:text-primary transition">Collection Points</a></li>
+              <li><a href="/page/payment-methods" className="hover:text-primary transition">Payment Methods</a></li>
+              <li><a href="/page/buy-now-pay-later" className="hover:text-primary transition">Buy Now, Pay Later</a></li>
+              <li><a href="/page/shipping-options" className="hover:text-primary transition">Shipping Options</a></li>
+              <li><a href="/page/delivery-tracking" className="hover:text-primary transition">Delivery Tracking</a></li>
+              <li><a href="/page/collection-points" className="hover:text-primary transition">Collection Points</a></li>
             </ul>
           </div>
           
