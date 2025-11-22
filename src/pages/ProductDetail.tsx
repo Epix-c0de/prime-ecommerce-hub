@@ -5,9 +5,11 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Star, ShoppingCart, Heart, Share2, Minus, Plus, Gift, Eye, GitCompare } from "lucide-react";
 import { toast } from "sonner";
 import { useProductBySlug, useProducts } from "@/hooks/useProducts";
+import { useProductVariants } from "@/hooks/useProductVariants";
 import { useCart } from "@/hooks/useCart";
 import { useWishlist } from "@/hooks/useWishlist";
 import { useReviews } from "@/hooks/useReviews";
@@ -31,8 +33,11 @@ const ProductDetail = () => {
   const [personalization, setPersonalization] = useState<Record<string, any>>({});
   const [show3D, setShow3D] = useState(false);
   const [showARModal, setShowARModal] = useState(false);
+  const [selectedVariant, setSelectedVariant] = useState<string | null>(null);
+  const [variantOptions, setVariantOptions] = useState<Record<string, string>>({});
   
   const { data: product, isLoading } = useProductBySlug(slug || '');
+  const { data: variants = [] } = useProductVariants(product?.id);
   const { data: allProducts = [] } = useProducts();
   const { cartItems, addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
@@ -40,6 +45,55 @@ const ProductDetail = () => {
   const { addToRecentlyViewed } = useRecentlyViewed();
   const { addToComparison, compareProducts, removeFromComparison, clearComparison, isInComparison } = useComparison();
   const [showComparison, setShowComparison] = useState(false);
+
+  // Get available variant option names (e.g., Size, Color)
+  const availableOptions = variants.length > 0 
+    ? Object.keys(variants[0]?.options || {})
+    : [];
+
+  // Get unique values for each option
+  const getOptionValues = (optionName: string) => {
+    const values = new Set<string>();
+    variants.forEach(variant => {
+      if (variant.options[optionName]) {
+        values.add(variant.options[optionName]);
+      }
+    });
+    return Array.from(values);
+  };
+
+  // Find matching variant based on selected options
+  const getCurrentVariant = () => {
+    if (!selectedVariant) return null;
+    return variants.find(v => v.id === selectedVariant);
+  };
+
+  // Calculate effective price and stock based on variant
+  const effectivePrice = () => {
+    const variant = getCurrentVariant();
+    return variant 
+      ? product!.price + variant.price_adjustment 
+      : product!.price;
+  };
+
+  const effectiveStock = () => {
+    const variant = getCurrentVariant();
+    return variant ? variant.stock : product!.stock;
+  };
+
+  // Update selected variant when options change
+  useEffect(() => {
+    if (variants.length > 0 && Object.keys(variantOptions).length > 0) {
+      const matchingVariant = variants.find(v => {
+        return availableOptions.every(option => 
+          v.options[option] === variantOptions[option]
+        );
+      });
+      if (matchingVariant) {
+        setSelectedVariant(matchingVariant.id);
+      }
+    }
+  }, [variantOptions, variants]);
 
   // Track product view
   useEffect(() => {
@@ -76,7 +130,25 @@ const ProductDetail = () => {
   }
 
   const handleAddToCart = () => {
-    addToCart({ productId: product.id, quantity });
+    // Validate variant selection if product has variants
+    if (variants.length > 0 && !selectedVariant) {
+      toast.error('Please select all product options');
+      return;
+    }
+
+    if (effectiveStock() < quantity) {
+      toast.error('Not enough stock available');
+      return;
+    }
+
+    addToCart({ 
+      productId: product.id, 
+      quantity,
+      // TODO: Add variant support to cart system
+      // variantId: selectedVariant 
+    });
+    
+    toast.success('Added to cart');
   };
 
   const handleBuyNow = () => {
@@ -213,7 +285,7 @@ const ProductDetail = () => {
               <div className="mb-6">
                 <div className="flex items-baseline gap-3 mb-2">
                   <span className="text-3xl font-bold text-foreground">
-                    KSh {product.price.toLocaleString()}
+                    KSh {effectivePrice().toLocaleString()}
                   </span>
                   {product.original_price && (
                     <>
@@ -227,9 +299,43 @@ const ProductDetail = () => {
                   )}
                 </div>
                 <p className="text-sm text-success">
-                  {product.stock > 0 ? 'In Stock' : 'Out of Stock'}
+                  {effectiveStock() > 0 ? `In Stock (${effectiveStock()} available)` : 'Out of Stock'}
                 </p>
               </div>
+
+              {/* Variant Selection */}
+              {variants.length > 0 && (
+                <div className="mb-6 space-y-4">
+                  <h3 className="font-semibold text-lg">Select Options</h3>
+                  {availableOptions.map(optionName => (
+                    <div key={optionName} className="space-y-2">
+                      <label className="text-sm font-medium">{optionName}</label>
+                      <Select
+                        value={variantOptions[optionName] || ''}
+                        onValueChange={(value) => 
+                          setVariantOptions(prev => ({ ...prev, [optionName]: value }))
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder={`Select ${optionName}`} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {getOptionValues(optionName).map(value => (
+                            <SelectItem key={value} value={value}>
+                              {value}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  ))}
+                  {selectedVariant && (
+                    <Badge variant="secondary" className="mt-2">
+                      Selected: {getCurrentVariant()?.name}
+                    </Badge>
+                  )}
+                </div>
+              )}
 
               {/* Quantity Selector */}
               <div className="mb-6">

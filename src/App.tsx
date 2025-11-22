@@ -22,6 +22,7 @@ import NotFound from "./pages/NotFound";
 import AdminControls from "./pages/AdminControls";
 import MultiStoreAdmin from "./pages/MultiStoreAdmin";
 import CMSPage from "./pages/CMSPage";
+import SamplePages from "./pages/SamplePages";
 
 const queryClient = new QueryClient();
 
@@ -53,6 +54,7 @@ const App = () => (
               <Route path="/admin" element={<AdminControls />} />
               <Route path="/admin/multi-store" element={<MultiStoreAdmin />} />
               <Route path="/page/:slug" element={<CMSPage />} />
+              <Route path="/demo" element={<SamplePages />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
               </Routes>
