@@ -1,4 +1,5 @@
-import { Palette, Settings, Sparkles, Store, LayoutDashboard, Bot, Activity, BarChart3, Package, FolderTree, ShoppingCart, Shield } from 'lucide-react';
+import { Palette, Settings, Sparkles, Store, LayoutDashboard, Bot, Activity, BarChart3, Package, FolderTree, ShoppingCart, Shield, Boxes, Layout } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import {
   Sidebar,
   SidebarContent,
@@ -34,6 +35,11 @@ const menuItems = [
   { id: 'activity' as AdminSection, title: 'Activity Feed', icon: Activity },
 ];
 
+const advancedFeatures = [
+  { title: 'Multi-Store Manager', icon: Boxes, path: '/admin/multi-store', description: 'Manage multiple storefronts' },
+  { title: 'CMS Page Builder', icon: Layout, path: '/admin/multi-store', description: 'Build custom pages' },
+];
+
 export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarProps) {
   const { open } = useSidebar();
 
@@ -52,6 +58,24 @@ export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarPro
                   >
                     <item.icon className="h-4 w-4" />
                     {open && <span>{item.title}</span>}
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Advanced</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {advancedFeatures.map((feature) => (
+                <SidebarMenuItem key={feature.title}>
+                  <SidebarMenuButton asChild>
+                    <Link to={feature.path} className="flex items-center gap-2">
+                      <feature.icon className="h-4 w-4" />
+                      {open && <span>{feature.title}</span>}
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
