@@ -756,6 +756,7 @@ export type Database = {
           last_name: string | null
           phone: string | null
           updated_at: string | null
+          username: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -765,6 +766,7 @@ export type Database = {
           last_name?: string | null
           phone?: string | null
           updated_at?: string | null
+          username?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -774,6 +776,7 @@ export type Database = {
           last_name?: string | null
           phone?: string | null
           updated_at?: string | null
+          username?: string | null
         }
         Relationships: []
       }
@@ -1191,6 +1194,14 @@ export type Database = {
     }
     Functions: {
       generate_share_code: { Args: never; Returns: string }
+      get_user_by_username_or_email: {
+        Args: { identifier: string }
+        Returns: {
+          email: string
+          user_id: string
+          username: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
