@@ -137,3 +137,54 @@ All colors MUST be HSL.
     opacity: 0.95;
   }
 }
+
+@keyframes footerPulse {
+  0% {
+    filter: saturate(0.9);
+  }
+  50% {
+    filter: saturate(1.1) brightness(1.05);
+  }
+  100% {
+    filter: saturate(0.9);
+  }
+}
+
+@keyframes footerFloat {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+@keyframes footerGradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes footerMarquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-footer-marquee {
+  display: inline-block;
+  min-width: 200%;
+  animation: footerMarquee 25s linear infinite;
+}

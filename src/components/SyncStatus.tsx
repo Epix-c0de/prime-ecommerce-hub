@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Wifi, WifiOff, Clock } from "lucide-react";
+import { Wifi, WifiOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -9,9 +9,8 @@ interface SyncStatusProps {
   className?: string;
 }
 
-export const SyncStatus = ({ isConnected, lastUpdate, className }: SyncStatusProps) => {
-  const [status, setStatus] = useState<"connected" | "pending" | "disconnected">("connected");
-  const [timeSinceUpdate, setTimeSinceUpdate] = useState("");
+export const SyncStatus = ({ isConnected, className }: SyncStatusProps) => {
+  const [status, setStatus] = useState<"connected" | "disconnected">("connected");
 
   useEffect(() => {
     if (!isConnected) {
@@ -19,36 +18,8 @@ export const SyncStatus = ({ isConnected, lastUpdate, className }: SyncStatusPro
       return;
     }
 
-    if (!lastUpdate) {
-      setStatus("connected");
-      return;
-    }
-
-    const checkStatus = () => {
-      const now = Date.now();
-      const diff = now - lastUpdate;
-
-      if (diff > 60000) {
-        setStatus("pending");
-      } else {
-        setStatus("connected");
-      }
-
-      // Calculate time since last update
-      const seconds = Math.floor(diff / 1000);
-      if (seconds < 60) {
-        setTimeSinceUpdate(`${seconds}s ago`);
-      } else {
-        const minutes = Math.floor(seconds / 60);
-        setTimeSinceUpdate(`${minutes}m ago`);
-      }
-    };
-
-    checkStatus();
-    const interval = setInterval(checkStatus, 5000);
-
-    return () => clearInterval(interval);
-  }, [isConnected, lastUpdate]);
+    setStatus("connected");
+  }, [isConnected]);
 
   const getStatusConfig = () => {
     switch (status) {
@@ -59,14 +30,6 @@ export const SyncStatus = ({ isConnected, lastUpdate, className }: SyncStatusPro
           bgColor: "bg-green-500/10",
           label: "Connected",
           description: "Receiving live updates from Admin Dashboard",
-        };
-      case "pending":
-        return {
-          icon: Clock,
-          color: "text-yellow-500",
-          bgColor: "bg-yellow-500/10",
-          label: "Pending",
-          description: "Last update received " + timeSinceUpdate,
         };
       case "disconnected":
         return {

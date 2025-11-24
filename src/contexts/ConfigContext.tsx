@@ -9,6 +9,7 @@ import { StoreConfig, StoreType, getStoreConfig } from '@/config/storeConfig';
 import { FeatureFlags, defaultFeatures, isFeatureEnabled } from '@/config/featuresConfig';
 import { SeasonalConfig, SeasonalMode, seasonalPresets, getActiveSeasonalMode } from '@/config/seasonalConfig';
 import { useRealtimeSync } from '@/hooks/useRealtimeSync';
+import { FooterConfig, defaultFooterConfig } from '@/config/footerConfig';
 
 interface ConfigContextType {
   // Theme
@@ -35,6 +36,10 @@ interface ConfigContextType {
   // Sync
   isConnected: boolean;
   lastUpdate: number;
+
+  // Footer
+  footerConfig: FooterConfig;
+  updateFooterConfig: (updates: Partial<FooterConfig> | ((prev: FooterConfig) => FooterConfig)) => void;
 }
 
 const ConfigContext = createContext<ConfigContextType | undefined>(undefined);
@@ -55,6 +60,7 @@ export const ConfigProvider: React.FC<ConfigProviderProps> = ({
   const [features, setFeatures] = useState<FeatureFlags>(defaultFeatures);
   const [seasonalMode, setSeasonalMode] = useState<SeasonalMode>('normal');
   const [seasonal, setSeasonal] = useState<SeasonalConfig>(seasonalPresets.normal);
+  const [footerConfig, setFooterConfig] = useState<FooterConfig>(defaultFooterConfig);
 
   // Initialize realtime sync
   const { isConnected, lastUpdate } = useRealtimeSync({
@@ -197,6 +203,30 @@ export const ConfigProvider: React.FC<ConfigProviderProps> = ({
     }
   }, []);
 
+  const updateFooterConfig = (updates: Partial<FooterConfig> | ((prev: FooterConfig) => FooterConfig)) => {
+    setFooterConfig(prev => {
+      const next = typeof updates === 'function' ? updates(prev) : {
+        ...prev,
+        ...updates,
+        sections: updates.sections ?? prev.sections,
+        socialLinks: updates.socialLinks ?? prev.socialLinks,
+      };
+      localStorage.setItem('footer-config', JSON.stringify(next));
+      return next;
+    });
+  };
+
+  useEffect(() => {
+    const savedFooter = localStorage.getItem('footer-config');
+    if (savedFooter) {
+      try {
+        setFooterConfig(JSON.parse(savedFooter));
+      } catch (error) {
+        console.error('Failed to parse footer config', error);
+      }
+    }
+  }, []);
+
   const value: ConfigContextType = {
     theme,
     themeMode,
@@ -213,6 +243,8 @@ export const ConfigProvider: React.FC<ConfigProviderProps> = ({
     setSeasonalMode: handleSetSeasonalMode,
     isConnected,
     lastUpdate,
+    footerConfig,
+    updateFooterConfig,
   };
 
   return (

@@ -1,83 +1,45 @@
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { useCMSPage } from "@/hooks/useCMSPages";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCart } from "@/hooks/useCart";
+import { cmsMockService } from "@/cms/services/mockCmsService";
+import type { Page } from "@/cms/types/page";
+import { DynamicPageRenderer } from "@/cms/components/DynamicPageRenderer";
 
 export default function CMSPage() {
   const { slug } = useParams<{ slug: string }>();
-  const { data: page, isLoading, error } = useCMSPage(slug || '');
   const { cartCount } = useCart();
+  const [page, setPage] = useState<Page | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const renderBlock = (block: any) => {
-    switch (block.type) {
-      case 'heading':
-        const HeadingTag = block.props.level || 'h2';
-        return (
-          <HeadingTag className="font-bold mb-4" key={block.id}>
-            {block.props.text}
-          </HeadingTag>
-        );
-
-      case 'paragraph':
-        return (
-          <p className="mb-4 text-muted-foreground" key={block.id}>
-            {block.props.text}
-          </p>
-        );
-
-      case 'image':
-        return (
-          <img
-            key={block.id}
-            src={block.props.src}
-            alt={block.props.alt}
-            className="w-full rounded-lg mb-6"
-          />
-        );
-
-      case 'gallery':
-        return (
-          <div
-            key={block.id}
-            className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6"
-          >
-            {block.props.images?.map((img: string, i: number) => (
-              <img
-                key={i}
-                src={img}
-                alt={`Gallery image ${i + 1}`}
-                className="w-full rounded-lg aspect-square object-cover"
-              />
-            ))}
-          </div>
-        );
-
-      case 'video':
-        return (
-          <div key={block.id} className="aspect-video mb-6">
-            <iframe
-              src={block.props.url}
-              className="w-full h-full rounded-lg"
-              allowFullScreen
-            />
-          </div>
-        );
-
-      default:
-        return null;
-    }
-  };
+  useEffect(() => {
+    if (!slug) return;
+    setIsLoading(true);
+    cmsMockService
+      .getPageBySlug(slug)
+      .then((result) => {
+        if (!result) {
+          setError("Page not found");
+          setPage(null);
+        } else {
+          setPage(result);
+          setError(null);
+        }
+      })
+      .finally(() => setIsLoading(false));
+  }, [slug]);
 
   if (isLoading) {
     return (
       <>
         <Header cartCount={cartCount} onCartClick={() => {}} />
         <main className="min-h-screen container py-12">
-          <Skeleton className="h-12 w-1/2 mb-6" />
-          <Skeleton className="h-4 w-full mb-4" />
-          <Skeleton className="h-4 w-full mb-4" />
+          <Skeleton className="mb-6 h-12 w-1/2" />
+          <Skeleton className="mb-4 h-4 w-full" />
+          <Skeleton className="mb-4 h-4 w-full" />
           <Skeleton className="h-4 w-3/4" />
         </main>
         <Footer />
@@ -90,10 +52,8 @@ export default function CMSPage() {
       <>
         <Header cartCount={cartCount} onCartClick={() => {}} />
         <main className="min-h-screen container py-12">
-          <h1 className="text-4xl font-bold mb-4">Page Not Found</h1>
-          <p className="text-muted-foreground">
-            The page you're looking for doesn't exist.
-          </p>
+          <h1 className="mb-4 text-4xl font-bold">Page Not Found</h1>
+          <p className="text-muted-foreground">{error ?? "The page you're looking for doesn't exist."}</p>
         </main>
         <Footer />
       </>
@@ -103,22 +63,19 @@ export default function CMSPage() {
   return (
     <>
       <Header cartCount={cartCount} onCartClick={() => {}} />
-      <main className="min-h-screen container py-12">
-        <article>
-          <h1 className="text-4xl font-bold mb-8">{page.title}</h1>
-          <div className="prose prose-lg max-w-none">
-            {page.content.map((block: any) => renderBlock(block))}
+      <main className="min-h-screen bg-background">
+        <article className="container space-y-8 py-12">
+          <div className="space-y-3">
+            <p className="text-xs uppercase tracking-[0.3em] text-primary">CMS Page</p>
+            <h1 className="text-4xl font-bold">{page.title}</h1>
+            {page.meta?.description && (
+              <p className="text-muted-foreground">{page.meta.description}</p>
+            )}
           </div>
+          <DynamicPageRenderer blocks={page.blocks} themeOverrides={page.themeOverrides as Record<string, string> | undefined} />
         </article>
       </main>
       <Footer />
-
-      {page.custom_css && (
-        <style dangerouslySetInnerHTML={{ __html: page.custom_css }} />
-      )}
-      {page.custom_js && (
-        <script dangerouslySetInnerHTML={{ __html: page.custom_js }} />
-      )}
     </>
   );
 }

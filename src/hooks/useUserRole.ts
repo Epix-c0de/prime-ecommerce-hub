@@ -21,11 +21,35 @@ export function useUserRole() {
         const { data, error } = await supabase
           .from('user_roles')
           .select('role')
-          .eq('user_id', user.id)
-          .single();
+          .eq('user_id', user.id);
 
         if (error) throw error;
-        setRole(data?.role as UserRole);
+
+        if (!data || data.length === 0) {
+          setRole('user');
+          return;
+        }
+
+        const roleHierarchy: UserRole[] = [
+          'super_admin',
+          'admin',
+          'manager',
+          'content_creator',
+          'inventory_manager',
+          'marketing_manager',
+          'support_agent',
+          'user'
+        ];
+
+        const roles = data
+          .map((record) => record.role as UserRole)
+          .filter((value): value is UserRole => value !== null);
+
+        const highestRole = roles.sort(
+          (a, b) => roleHierarchy.indexOf(a) - roleHierarchy.indexOf(b)
+        )[0] ?? 'user';
+
+        setRole(highestRole);
       } catch (error) {
         console.error('Error fetching user role:', error);
         setRole(null);

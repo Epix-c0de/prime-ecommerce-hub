@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ConfigProvider } from "./contexts/ConfigContext";
 import { RealtimeSyncProvider } from "./contexts/RealtimeSyncContext";
+import { CMSProvider } from "./cms/state/CmsContext";
 import Index from "./pages/Index";
 import LifestyleStore from "./pages/LifestyleStore";
 import CategoryPage from "./pages/CategoryPage";
@@ -22,6 +23,7 @@ import NotFound from "./pages/NotFound";
 import AdminControls from "./pages/AdminControls";
 import MultiStoreAdmin from "./pages/MultiStoreAdmin";
 import CMSPage from "./pages/CMSPage";
+import CMSPreview from "./pages/CMSPreview";
 import SamplePages from "./pages/SamplePages";
 
 const queryClient = new QueryClient();
@@ -31,10 +33,11 @@ const App = () => (
     <AuthProvider>
       <ConfigProvider>
         <RealtimeSyncProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
+          <CMSProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/lifestyle" element={<LifestyleStore />} />
@@ -54,12 +57,14 @@ const App = () => (
               <Route path="/admin" element={<AdminControls />} />
               <Route path="/admin/multi-store" element={<MultiStoreAdmin />} />
               <Route path="/page/:slug" element={<CMSPage />} />
+              <Route path="/preview/:slug" element={<CMSPreview />} />
               <Route path="/demo" element={<SamplePages />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
               </Routes>
-            </BrowserRouter>
-          </TooltipProvider>
+              </BrowserRouter>
+            </TooltipProvider>
+          </CMSProvider>
         </RealtimeSyncProvider>
       </ConfigProvider>
     </AuthProvider>
