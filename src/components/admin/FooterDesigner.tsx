@@ -123,9 +123,9 @@ export const FooterDesigner = () => {
     reader.onload = () => {
       if (typeof reader.result === "string") {
         if (type === "image") {
-          setDraft((prev) => ({ ...prev, backgroundType: "image", backgroundImage: reader.result }));
+          setDraft((prev) => ({ ...prev, backgroundType: "image", backgroundImage: reader.result as string }));
         } else {
-          setDraft((prev) => ({ ...prev, backgroundType: "video", backgroundVideo: reader.result }));
+          setDraft((prev) => ({ ...prev, backgroundType: "video", backgroundVideo: reader.result as string }));
         }
       }
     };
