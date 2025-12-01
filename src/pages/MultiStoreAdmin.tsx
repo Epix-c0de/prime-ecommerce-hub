@@ -18,12 +18,14 @@ export default function MultiStoreAdmin() {
   const { isSuperAdmin, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
 
+  // Redirect to auth if not logged in
   useEffect(() => {
     if (!authLoading && !user) {
       navigate('/auth');
     }
   }, [user, authLoading, navigate]);
 
+  // Show loading state
   if (authLoading || roleLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -32,10 +34,12 @@ export default function MultiStoreAdmin() {
     );
   }
 
+  // Redirect if not logged in
   if (!user) {
     return null;
   }
 
+  // Show access denied for non-super-admin users
   if (!isSuperAdmin) {
     return (
       <>
@@ -44,7 +48,8 @@ export default function MultiStoreAdmin() {
           <Alert variant="destructive" className="max-w-md">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              You don't have permission to access multi-store management. Only super administrators can access this area.
+              Access denied. You don't have permission to access multi-store management. 
+              Only super administrators can access this area.
             </AlertDescription>
           </Alert>
         </div>

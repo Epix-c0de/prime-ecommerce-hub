@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
@@ -23,71 +23,26 @@ import { useConfig } from '@/contexts/ConfigContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { AlertCircle, Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
 
 type AdminSection = 'dashboard' | 'theme' | 'features' | 'seasonal' | 'store' | 'ai' | 'activity' | 'analytics' | 'products' | 'categories' | 'orders' | 'roles' | 'theme-studio' | 'pages' | 'footer' | 'cms-pages';
 
 const AdminControls = () => {
   const [activeSection, setActiveSection] = useState<AdminSection>('dashboard');
-  const [hasAdminOverride, setHasAdminOverride] = useState(false);
-  const [overrideReady, setOverrideReady] = useState(false);
-  const [overrideError, setOverrideError] = useState<string | null>(null);
-  const [overrideSubmitting, setOverrideSubmitting] = useState(false);
   const { isConnected, lastUpdate } = useConfig();
   const { user, loading: authLoading } = useAuth();
   const { loading: roleLoading, isAdmin } = useUserRole();
   const navigate = useNavigate();
 
-  const ADMIN_USERNAME = 'admin@prime';
-  const ADMIN_PASSWORD = 'admin@gmail.com';
-
+  // Redirect to auth if not logged in
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const stored = window.localStorage.getItem('prime-admin-override') === 'true';
-    setHasAdminOverride(stored);
-    setOverrideReady(true);
-  }, []);
-
-  useEffect(() => {
-    if (!overrideReady) return;
-    if (!authLoading && !user && !hasAdminOverride) {
+    if (!authLoading && !user) {
       navigate('/auth');
     }
-  }, [user, authLoading, navigate, hasAdminOverride, overrideReady]);
+  }, [user, authLoading, navigate]);
 
-  const handleOverrideSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setOverrideSubmitting(true);
-    setOverrideError(null);
-
-    const formData = new FormData(event.currentTarget);
-    const username = (formData.get('adminUsername') as string)?.trim();
-    const password = (formData.get('adminPassword') as string)?.trim();
-
-    if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
-      window.localStorage.setItem('prime-admin-override', 'true');
-      setHasAdminOverride(true);
-      toast.success('Admin access granted');
-    } else {
-      setOverrideError('Invalid admin credentials');
-      toast.error('Invalid admin credentials');
-    }
-
-    setOverrideSubmitting(false);
-  };
-
-  const handleOverrideReset = () => {
-    window.localStorage.removeItem('prime-admin-override');
-    setHasAdminOverride(false);
-    toast.success('Admin access reset');
-  };
-
-  const allowAdmin = hasAdminOverride || isAdmin;
-
-  if (!overrideReady) {
+  // Show loading state while checking auth and roles
+  if (authLoading || roleLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -95,71 +50,22 @@ const AdminControls = () => {
     );
   }
 
-  if (authLoading || roleLoading) {
-    if (!hasAdminOverride) {
-      return (
-        <div className="min-h-screen flex items-center justify-center bg-background">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      );
-    }
-  }
-
-  if (!user && !hasAdminOverride) {
+  // Redirect if not logged in
+  if (!user) {
     return null;
   }
 
-  if (!allowAdmin) {
+  // Show access denied for non-admin users
+  if (!isAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-6">
-        <div className="w-full max-w-md bg-card border rounded-2xl p-6 space-y-4 shadow-lg">
-          <div className="space-y-2 text-center">
-            <h2 className="text-2xl font-semibold">Admin Access Required</h2>
-            <p className="text-sm text-muted-foreground">
-              Enter the admin dashboard credentials to continue.
-            </p>
-          </div>
-          <form onSubmit={handleOverrideSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <label htmlFor="adminUsername" className="text-sm font-medium text-foreground">
-                Admin Username
-              </label>
-              <Input
-                id="adminUsername"
-                name="adminUsername"
-                autoComplete="username"
-                placeholder="admin@prime"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="adminPassword" className="text-sm font-medium text-foreground">
-                Admin Password
-              </label>
-              <Input
-                id="adminPassword"
-                name="adminPassword"
-                type="password"
-                autoComplete="current-password"
-                placeholder="Enter admin password"
-                required
-              />
-            </div>
-            {overrideError && (
-              <div className="text-sm text-destructive">{overrideError}</div>
-            )}
-            <Button type="submit" className="w-full" disabled={overrideSubmitting}>
-              {overrideSubmitting ? 'Verifying…' : 'Unlock Admin Dashboard'}
-            </Button>
-          </form>
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              Only users with the username <strong>admin@prime</strong> and password{" "}
-              <strong>admin@gmail.com</strong> may enter.
-            </AlertDescription>
-          </Alert>
-        </div>
+        <Alert variant="destructive" className="max-w-md">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            Access denied. You don't have permission to access the admin dashboard. 
+            Only users with admin role can access this area.
+          </AlertDescription>
+        </Alert>
       </div>
     );
   }
@@ -224,11 +130,6 @@ const AdminControls = () => {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              {hasAdminOverride && (
-                <Button variant="outline" size="sm" onClick={handleOverrideReset}>
-                  Reset Admin Access
-                </Button>
-              )}
               <SyncStatus isConnected={isConnected} lastUpdate={lastUpdate} />
             </div>
           </header>
