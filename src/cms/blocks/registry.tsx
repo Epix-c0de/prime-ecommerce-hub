@@ -9,7 +9,7 @@ import { CTABlockDefinition } from "./types/CTABlock";
 import { ProductGridBlockDefinition } from "./types/ProductGridBlock";
 import { VideoBlockDefinition } from "./types/VideoBlock";
 
-export const BLOCK_DEFINITIONS: BlockDefinition[] = [
+export const BLOCK_DEFINITIONS: BlockDefinition<any>[] = [
   HeroBlockDefinition,
   RichTextBlockDefinition,
   ImageBlockDefinition,
@@ -19,7 +19,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
   VideoBlockDefinition,
 ];
 
-export const blockMap = BLOCK_DEFINITIONS.reduce<Record<string, BlockDefinition>>(
+export const blockMap = BLOCK_DEFINITIONS.reduce<Record<string, BlockDefinition<any>>>(
   (map, block) => {
     map[block.type] = block;
     return map;

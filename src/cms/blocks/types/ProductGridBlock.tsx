@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { BlockDefinition } from "../types";
 import { useProducts } from "@/hooks/useProducts";
-import { ProductCard } from "@/components/ProductCard";
+import ProductCard from "@/components/ProductCard";
 
 interface ProductGridBlockProps {
   title?: string;
@@ -16,13 +16,18 @@ const ProductGridComponent = ({
   productIds,
   limit = 4,
 }: ProductGridBlockProps) => {
-  const { products = [] } = useProducts();
+  const { data: products = [] } = useProducts();
   const items = useMemo(() => {
     if (productIds && productIds.length > 0) {
       return products.filter((product) => productIds.includes(product.id)).slice(0, limit);
     }
     return products.slice(0, limit);
   }, [products, productIds, limit]);
+
+  const handleAddToCart = (productId: string) => {
+    // This is a CMS preview, so we don't actually add to cart
+    console.log("Add to cart:", productId);
+  };
 
   if (!items.length) {
     return (
@@ -43,7 +48,7 @@ const ProductGridComponent = ({
         }
       >
         {items.map((product) => (
-          <ProductCard key={product.id} product={product} />
+          <ProductCard key={product.id} product={product} onAddToCart={handleAddToCart} />
         ))}
       </div>
     </section>

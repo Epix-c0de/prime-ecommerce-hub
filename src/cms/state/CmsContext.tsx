@@ -35,7 +35,9 @@ export const CMSProvider = ({ children }: { children: React.ReactNode }) => {
     cmsMockService.listMedia().then(setMedia);
     cmsMockService.listThemes().then(setThemes);
     fetchBlockDefinitions().then(setBlockDefinitions);
-    return unsubscribe;
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   const refresh = async () => {
