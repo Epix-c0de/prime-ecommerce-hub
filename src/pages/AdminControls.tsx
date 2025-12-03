@@ -18,14 +18,20 @@ import { OrderManagement } from '@/components/admin/OrderManagement';
 import { PageManagement } from '@/components/admin/PageManagement';
 import { FooterDesigner } from '@/components/admin/FooterDesigner';
 import { CMSPageList } from '@/components/admin/cms/CMSPageList';
+import { HomepageEditor } from '@/components/admin/HomepageEditor';
+import { SuperAdminDashboard } from '@/components/admin/SuperAdminDashboard';
+import { MarketingAdmin } from '@/components/admin/MarketingAdmin';
+import { CustomersAdmin } from '@/components/admin/CustomersAdmin';
+import { ShippingAdmin } from '@/components/admin/ShippingAdmin';
+import { ReturnsAdmin } from '@/components/admin/ReturnsAdmin';
+import { SupportTickets } from '@/components/admin/SupportTickets';
+import { AdminSection } from '@/components/admin/AdminSidebar';
 import { SyncStatus } from '@/components/SyncStatus';
 import { useConfig } from '@/contexts/ConfigContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle, Loader2 } from 'lucide-react';
-
-type AdminSection = 'dashboard' | 'theme' | 'features' | 'seasonal' | 'store' | 'ai' | 'activity' | 'analytics' | 'products' | 'categories' | 'orders' | 'roles' | 'theme-studio' | 'pages' | 'footer' | 'cms-pages';
 
 const AdminControls = () => {
   const [activeSection, setActiveSection] = useState<AdminSection>('dashboard');
@@ -74,6 +80,10 @@ const AdminControls = () => {
     switch (activeSection) {
       case 'dashboard':
         return <DashboardOverview />;
+      case 'super-admin':
+        return <SuperAdminDashboard />;
+      case 'homepage':
+        return <HomepageEditor />;
       case 'theme':
         return <ThemeControls />;
       case 'features':
@@ -104,6 +114,16 @@ const AdminControls = () => {
         return <CMSPageList />;
       case 'footer':
         return <FooterDesigner />;
+      case 'marketing':
+        return <MarketingAdmin />;
+      case 'customers':
+        return <CustomersAdmin />;
+      case 'shipping':
+        return <ShippingAdmin />;
+      case 'returns':
+        return <ReturnsAdmin />;
+      case 'support':
+        return <SupportTickets />;
       default:
         return <DashboardOverview />;
     }

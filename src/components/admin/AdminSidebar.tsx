@@ -12,7 +12,7 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 
-type AdminSection = 'dashboard' | 'theme' | 'features' | 'seasonal' | 'store' | 'ai' | 'activity' | 'analytics' | 'products' | 'categories' | 'orders' | 'roles' | 'theme-studio' | 'pages' | 'footer' | 'cms-pages';
+export type AdminSection = 'dashboard' | 'super-admin' | 'homepage' | 'theme' | 'features' | 'seasonal' | 'store' | 'ai' | 'activity' | 'analytics' | 'products' | 'categories' | 'orders' | 'roles' | 'theme-studio' | 'pages' | 'footer' | 'cms-pages' | 'marketing' | 'customers' | 'shipping' | 'returns' | 'support';
 
 interface AdminSidebarProps {
   activeSection: AdminSection;
@@ -21,11 +21,18 @@ interface AdminSidebarProps {
 
 const menuItems = [
   { id: 'dashboard' as AdminSection, title: 'Dashboard', icon: LayoutDashboard },
+  { id: 'super-admin' as AdminSection, title: 'Super Admin', icon: Shield },
   { id: 'orders' as AdminSection, title: 'Orders', icon: ShoppingCart },
   { id: 'products' as AdminSection, title: 'Products', icon: Package },
   { id: 'categories' as AdminSection, title: 'Categories', icon: FolderTree },
+  { id: 'customers' as AdminSection, title: 'Customers', icon: Activity },
+  { id: 'homepage' as AdminSection, title: 'Homepage Editor', icon: Layout },
   { id: 'pages' as AdminSection, title: 'Content Pages', icon: FileText },
   { id: 'cms-pages' as AdminSection, title: 'CMS Builder', icon: Layers },
+  { id: 'marketing' as AdminSection, title: 'Marketing', icon: Sparkles },
+  { id: 'shipping' as AdminSection, title: 'Shipping', icon: Package },
+  { id: 'returns' as AdminSection, title: 'Returns', icon: Activity },
+  { id: 'support' as AdminSection, title: 'Support Tickets', icon: Activity },
   { id: 'roles' as AdminSection, title: 'User Roles', icon: Shield },
   { id: 'theme-studio' as AdminSection, title: 'Theme Studio', icon: Palette },
   { id: 'theme' as AdminSection, title: 'Quick Themes', icon: Palette },
