@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ConfigProvider } from "./contexts/ConfigContext";
 import { RealtimeSyncProvider } from "./contexts/RealtimeSyncContext";
+import { SiteUrlProvider } from "./contexts/SiteUrlContext";
 import { CMSProvider } from "./cms/state/CmsContext";
 import Index from "./pages/Index";
 import LifestyleStore from "./pages/LifestyleStore";
@@ -32,11 +33,12 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <ConfigProvider>
-        <RealtimeSyncProvider>
-          <CMSProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
+        <SiteUrlProvider>
+          <RealtimeSyncProvider>
+            <CMSProvider>
+              <TooltipProvider>
+                <Toaster />
+                <Sonner />
               <BrowserRouter>
               <Routes>
                 <Route path="/" element={<Index />} />
@@ -63,9 +65,10 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
               </Routes>
               </BrowserRouter>
-            </TooltipProvider>
-          </CMSProvider>
-        </RealtimeSyncProvider>
+              </TooltipProvider>
+            </CMSProvider>
+          </RealtimeSyncProvider>
+        </SiteUrlProvider>
       </ConfigProvider>
     </AuthProvider>
   </QueryClientProvider>

@@ -968,6 +968,36 @@ export type Database = {
         }
         Relationships: []
       }
+      site_settings: {
+        Row: {
+          admin_url: string | null
+          api_base_url: string | null
+          created_at: string | null
+          id: string
+          last_updated: string | null
+          site_url: string
+          updated_by: string | null
+        }
+        Insert: {
+          admin_url?: string | null
+          api_base_url?: string | null
+          created_at?: string | null
+          id?: string
+          last_updated?: string | null
+          site_url?: string
+          updated_by?: string | null
+        }
+        Update: {
+          admin_url?: string | null
+          api_base_url?: string | null
+          created_at?: string | null
+          id?: string
+          last_updated?: string | null
+          site_url?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       stores: {
         Row: {
           contact_info: Json | null

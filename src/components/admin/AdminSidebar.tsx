@@ -1,4 +1,4 @@
-import { Palette, Settings, Sparkles, Store, LayoutDashboard, Bot, Activity, BarChart3, Package, FolderTree, ShoppingCart, Shield, Boxes, Layout, FileText, PenTool, Layers } from 'lucide-react';
+import { Palette, Settings, Sparkles, Store, LayoutDashboard, Bot, Activity, BarChart3, Package, FolderTree, ShoppingCart, Shield, Boxes, Layout, FileText, PenTool, Layers, Globe } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import {
   Sidebar,
@@ -12,7 +12,7 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 
-export type AdminSection = 'dashboard' | 'super-admin' | 'homepage' | 'theme' | 'features' | 'seasonal' | 'store' | 'ai' | 'activity' | 'analytics' | 'products' | 'categories' | 'orders' | 'roles' | 'theme-studio' | 'pages' | 'footer' | 'cms-pages' | 'marketing' | 'customers' | 'shipping' | 'returns' | 'support';
+export type AdminSection = 'dashboard' | 'super-admin' | 'homepage' | 'theme' | 'features' | 'seasonal' | 'store' | 'ai' | 'activity' | 'analytics' | 'products' | 'categories' | 'orders' | 'roles' | 'theme-studio' | 'pages' | 'footer' | 'cms-pages' | 'marketing' | 'customers' | 'shipping' | 'returns' | 'support' | 'site-settings';
 
 interface AdminSidebarProps {
   activeSection: AdminSection;
@@ -40,6 +40,7 @@ const menuItems = [
   { id: 'features' as AdminSection, title: 'Feature Toggles', icon: Settings },
   { id: 'seasonal' as AdminSection, title: 'Seasonal Modes', icon: Sparkles },
   { id: 'store' as AdminSection, title: 'Store Settings', icon: Store },
+  { id: 'site-settings' as AdminSection, title: 'Domain Sync', icon: Globe },
   { id: 'ai' as AdminSection, title: 'AI Management', icon: Bot },
   { id: 'analytics' as AdminSection, title: 'Analytics', icon: BarChart3 },
   { id: 'activity' as AdminSection, title: 'Activity Feed', icon: Activity },

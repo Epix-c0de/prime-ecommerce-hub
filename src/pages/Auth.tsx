@@ -205,13 +205,18 @@ const Auth = () => {
             <div className="animate-fade-in">
               <h2 className="text-2xl font-bold text-foreground mb-6">Login</h2>
               <form onSubmit={handleLogin} className="space-y-4">
-                <Input
-                  name="emailOrUsername"
-                  type="text"
-                  placeholder="Email or Username"
-                  className="w-full rounded-xl border-input"
-                  required
-                />
+                <div>
+                  <Input
+                    name="emailOrUsername"
+                    type="text"
+                    placeholder="Email or Username"
+                    className="w-full rounded-xl border-input"
+                    required
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Admins can use username (e.g., prime)
+                  </p>
+                </div>
                 <Input
                   name="password"
                   type="password"
