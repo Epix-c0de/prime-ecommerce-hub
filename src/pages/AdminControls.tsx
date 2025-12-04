@@ -25,6 +25,7 @@ import { CustomersAdmin } from '@/components/admin/CustomersAdmin';
 import { ShippingAdmin } from '@/components/admin/ShippingAdmin';
 import { ReturnsAdmin } from '@/components/admin/ReturnsAdmin';
 import { SupportTickets } from '@/components/admin/SupportTickets';
+import { SiteSettings } from '@/components/admin/SiteSettings';
 import { AdminSection } from '@/components/admin/AdminSidebar';
 import { SyncStatus } from '@/components/SyncStatus';
 import { useConfig } from '@/contexts/ConfigContext';
@@ -124,6 +125,8 @@ const AdminControls = () => {
         return <ReturnsAdmin />;
       case 'support':
         return <SupportTickets />;
+      case 'site-settings':
+        return <SiteSettings />;
       default:
         return <DashboardOverview />;
     }
