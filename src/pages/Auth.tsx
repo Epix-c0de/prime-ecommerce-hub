@@ -51,14 +51,34 @@ const Auth = () => {
       return;
     }
 
-    const { error } = await signIn(emailOrUsername, password);
+    // Try primary login
+    const { error } = await signIn(emailOrUsername.trim(), password);
     
-    setIsLoading(false);
-    
-    if (error) {
-      // Error is already shown by signIn function
+    if (!error) {
+      setIsLoading(false);
       return;
     }
+
+    // Fallback: If primary fails and it's the admin username, try admin email
+    if (emailOrUsername.toLowerCase() === 'prime') {
+      const { error: fallbackError } = await signIn('epixshots001@gmail.com', password);
+      if (!fallbackError) {
+        setIsLoading(false);
+        return;
+      }
+    }
+    
+    // Fallback: If email login fails, try looking up as username
+    if (emailOrUsername.includes('@')) {
+      const usernameGuess = emailOrUsername.split('@')[0];
+      const { error: fallbackError } = await signIn(usernameGuess, password);
+      if (!fallbackError) {
+        setIsLoading(false);
+        return;
+      }
+    }
+    
+    setIsLoading(false);
   };
 
   const handleGoogleSignIn = async () => {
