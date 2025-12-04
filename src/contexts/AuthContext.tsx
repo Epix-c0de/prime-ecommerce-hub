@@ -69,9 +69,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (emailOrUsername: string, password: string) => {
     try {
-      // Check if input is email format
       const isEmail = emailOrUsername.includes('@');
       
+      // Try primary login method
       if (isEmail) {
         // Direct email login
         const { error } = await supabase.auth.signInWithPassword({
@@ -79,36 +79,51 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           password,
         });
         
-        if (error) {
-          toast.error(error.message);
-        } else {
+        if (!error) {
           toast.success("Welcome back!");
+          return { error: null };
         }
         
+        // If email login fails, don't fallback - return error
+        toast.error(error.message);
         return { error };
       } else {
         // Username login - lookup email first
         const { data: userData, error: lookupError } = await supabase
           .rpc('get_user_by_username_or_email', { identifier: emailOrUsername });
         
-        if (lookupError || !userData || userData.length === 0) {
-          toast.error("Invalid username or password");
-          return { error: new Error("User not found") };
+        if (!lookupError && userData && userData.length > 0) {
+          const userEmail = userData[0].email;
+          const { error } = await supabase.auth.signInWithPassword({
+            email: userEmail,
+            password,
+          });
+          
+          if (!error) {
+            toast.success("Welcome back!");
+            return { error: null };
+          }
+          
+          // Username found but password wrong
+          toast.error("Invalid password");
+          return { error };
         }
         
-        const userEmail = userData[0].email;
-        const { error } = await supabase.auth.signInWithPassword({
-          email: userEmail,
+        // Fallback: Try as direct email if username lookup fails
+        // This handles cases where username might actually be an email without @
+        const { error: fallbackError } = await supabase.auth.signInWithPassword({
+          email: `${emailOrUsername}@prime.com`,
           password,
         });
         
-        if (error) {
-          toast.error(error.message);
-        } else {
+        if (!fallbackError) {
           toast.success("Welcome back!");
+          return { error: null };
         }
         
-        return { error };
+        // All attempts failed
+        toast.error("Invalid username or password");
+        return { error: new Error("Authentication failed") };
       }
     } catch (error: any) {
       toast.error("An error occurred during sign in");
