@@ -17,22 +17,28 @@ const Auth = () => {
 
   useEffect(() => {
     const checkUserRole = async () => {
-      if (user) {
-        // Check if user has admin role
-        const { data: roleData } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', user.id)
-          .single();
+      if (!user) return;
 
-        if (roleData?.role === 'super_admin' || roleData?.role === 'admin') {
-          navigate("/admin");
-        } else {
-          navigate("/dashboard");
-        }
+      // user_roles can contain multiple rows per user; using .single() can error and cause wrong redirects
+      const { data: roles, error } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id);
+
+      if (error) {
+        console.error("Error fetching user role:", error);
+        navigate("/dashboard");
+        return;
       }
+
+      const isAdminUser =
+        (roles ?? []).some(
+          (r) => r.role === "super_admin" || r.role === "admin"
+        );
+
+      navigate(isAdminUser ? "/admin" : "/dashboard");
     };
-    
+
     checkUserRole();
   }, [user, navigate]);
 
