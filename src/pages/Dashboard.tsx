@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Package, Heart, User, MapPin, LogOut } from "lucide-react";
+import { Package, Heart, User, MapPin, LogOut, Shield } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useOrders } from "@/hooks/useOrders";
 import { useWishlist } from "@/hooks/useWishlist";
@@ -15,6 +15,7 @@ import { useGiftRegistry } from "@/hooks/useGiftRegistry";
 import ProductCard from "@/components/ProductCard";
 import { useCart } from "@/hooks/useCart";
 import { GiftRegistryDialog } from "@/components/GiftRegistryDialog";
+import { useUserRole } from "@/hooks/useUserRole";
 import { Gift, Copy, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 
@@ -26,6 +27,7 @@ const Dashboard = () => {
   const { addresses } = useAddresses();
   const { registries, deleteRegistry } = useGiftRegistry();
   const { addToCart } = useCart();
+  const { isAdmin } = useUserRole();
   const [showRegistryDialog, setShowRegistryDialog] = useState(false);
 
   useEffect(() => {
@@ -60,10 +62,18 @@ const Dashboard = () => {
               <h1 className="text-3xl font-bold">My Account</h1>
               <p className="text-muted-foreground">Welcome back, {user.email}</p>
             </div>
+          <div className="flex gap-2">
+            {isAdmin && (
+              <Button onClick={() => navigate("/admin")}>
+                <Shield className="mr-2 h-4 w-4" />
+                Admin Dashboard
+              </Button>
+            )}
             <Button variant="outline" onClick={handleLogout}>
               <LogOut className="mr-2 h-4 w-4" />
               Logout
             </Button>
+          </div>
           </div>
 
           <div className="grid md:grid-cols-4 gap-4 mb-8">
