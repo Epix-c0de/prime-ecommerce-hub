@@ -44,7 +44,7 @@ All colors MUST be HSL.
     --input: 0 0% 89%;
     --ring: 28 92% 54%;
 
-    --radius: 0.5rem;
+    --radius: 1.75rem;
 
     --dark: 0 0% 20%;
     --success: 142 71% 45%;
@@ -126,7 +126,7 @@ All colors MUST be HSL.
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 0 0% 100%;
     --sidebar-ring: 0 0% 100%;
-    --radius: 0rem;
+    --radius: 1.75rem;
     --shadow-2xs: 1px 1px 0px 0px #ffffff;
     --shadow-xs: 2px 2px 0px 0px #ffffff;
     --shadow-sm: 3px 3px 0px 0px #ffffff;
