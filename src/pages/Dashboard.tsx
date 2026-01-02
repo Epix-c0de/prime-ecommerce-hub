@@ -27,7 +27,7 @@ const Dashboard = () => {
   const { addresses } = useAddresses();
   const { registries, deleteRegistry } = useGiftRegistry();
   const { addToCart } = useCart();
-  const { isAdmin } = useUserRole();
+  const { isAdmin, isSuperAdmin, loading: roleLoading } = useUserRole();
   const [showRegistryDialog, setShowRegistryDialog] = useState(false);
 
   useEffect(() => {
@@ -63,8 +63,8 @@ const Dashboard = () => {
               <p className="text-muted-foreground">Welcome back, {user.email}</p>
             </div>
           <div className="flex gap-2">
-            {isAdmin && (
-              <Button onClick={() => navigate("/admin")}>
+            {(isAdmin || isSuperAdmin) && !roleLoading && (
+              <Button onClick={() => navigate("/admin")} className="bg-primary hover:bg-primary/90">
                 <Shield className="mr-2 h-4 w-4" />
                 Admin Dashboard
               </Button>
