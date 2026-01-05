@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button } from './ui/button';
-import { Camera, Eye } from 'lucide-react';
+import { Camera } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 
@@ -12,55 +12,39 @@ interface ARViewerProps {
 
 export function ARViewer({ modelUrl, productName, productImage }: ARViewerProps) {
   const [showARDialog, setShowARDialog] = useState(false);
-  const [arSupported, setArSupported] = useState(true);
 
-  const checkARSupport = async () => {
-    // Check for WebXR support
-    if ('xr' in navigator) {
-      try {
-        const supported = await (navigator as any).xr?.isSessionSupported('immersive-ar');
-        setArSupported(supported);
-        return supported;
-      } catch (err) {
-        setArSupported(false);
-        return false;
+  const startAR = () => {
+    if (modelUrl) {
+      // For iOS - Quick Look
+      if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+        const usdzUrl = modelUrl.replace('.glb', '.usdz').replace('.gltf', '.usdz');
+        const link = document.createElement('a');
+        link.rel = 'ar';
+        link.href = usdzUrl;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        return;
+      }
+      // For Android - Scene Viewer
+      if (/Android/.test(navigator.userAgent)) {
+        const sceneViewerUrl = `https://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(modelUrl)}&mode=ar_preferred`;
+        window.open(sceneViewerUrl, '_blank');
+        return;
       }
     }
-    setArSupported(false);
-    return false;
-  };
-
-  const startAR = async () => {
-    const supported = await checkARSupport();
-    
-    if (!supported) {
-      toast.info('AR View', {
-        description: 'AR is not supported on this device. Showing 3D preview instead.',
-      });
-      setShowARDialog(true);
-      return;
-    }
-
-    if (modelUrl) {
-      // Use model-viewer for AR
-      setShowARDialog(true);
-    } else {
-      toast.info('AR Preview', {
-        description: '3D model not available for this product. Using image preview.',
-      });
-      setShowARDialog(true);
+    // Fallback - show 3D dialog
+    setShowARDialog(true);
+    if (!modelUrl) {
+      toast.info('3D model not available for this product');
     }
   };
 
   return (
     <>
-      <Button
-        onClick={startAR}
-        variant="outline"
-        className="w-full gap-2"
-      >
+      <Button onClick={startAR} variant="outline" className="w-full gap-2">
         <Camera className="w-4 h-4" />
-        View in Your Space
+        {modelUrl ? 'View in AR' : 'View in Your Space'}
       </Button>
 
       <Dialog open={showARDialog} onOpenChange={setShowARDialog}>
@@ -71,38 +55,33 @@ export function ARViewer({ modelUrl, productName, productImage }: ARViewerProps)
           
           <div className="space-y-4">
             {modelUrl ? (
-              <div className="bg-muted rounded-lg h-[500px] flex items-center justify-center relative overflow-hidden">
-                <div 
-                  dangerouslySetInnerHTML={{
-                    __html: `<model-viewer src="${modelUrl}" alt="${productName}" ar ar-modes="webxr scene-viewer quick-look" camera-controls shadow-intensity="1" style="width: 100%; height: 100%;"></model-viewer>`
-                  }}
+              <div className="rounded-lg h-[500px] overflow-hidden bg-gradient-to-b from-muted to-muted/50">
+                <model-viewer
+                  src={modelUrl}
+                  alt={productName}
+                  ar
+                  ar-modes="webxr scene-viewer quick-look"
+                  camera-controls
+                  auto-rotate
+                  shadow-intensity="1"
+                  style={{ width: '100%', height: '100%' }}
                 />
               </div>
             ) : (
-              <div className="bg-muted rounded-lg h-[500px] flex items-center justify-center">
-                <div className="text-center space-y-4">
-                  <img 
-                    src={productImage} 
-                    alt={productName}
-                    className="max-h-80 mx-auto rounded-lg"
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    Point your camera at a flat surface to place this item
-                  </p>
+              <div className="bg-muted rounded-lg h-[400px] flex items-center justify-center">
+                <div className="text-center space-y-4 p-6">
+                  <img src={productImage} alt={productName} className="max-h-64 mx-auto rounded-lg object-contain" />
+                  <p className="text-sm text-muted-foreground">3D model not available. Showing product image.</p>
                 </div>
               </div>
             )}
 
-            <div className="bg-muted/50 p-4 rounded-lg space-y-2">
-              <div className="flex items-center gap-2 text-sm">
-                <Eye className="w-4 h-4" />
-                <span className="font-medium">AR Tips:</span>
-              </div>
-              <ul className="text-sm text-muted-foreground space-y-1 ml-6 list-disc">
+            <div className="bg-muted/50 p-4 rounded-lg text-sm text-muted-foreground">
+              <p className="font-medium mb-2">AR Tips:</p>
+              <ul className="list-disc list-inside space-y-1">
+                <li>Use on mobile device for best AR experience</li>
                 <li>Find a well-lit, flat surface</li>
-                <li>Move your device slowly to detect the surface</li>
-                <li>Tap to place the item in your space</li>
-                <li>Pinch to resize or drag to reposition</li>
+                <li>Pinch to resize, drag to move</li>
               </ul>
             </div>
           </div>
