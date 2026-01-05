@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,117 +8,207 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { ImageUpload } from '@/components/ui/image-upload';
 import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from '@/components/ui/table';
-import { 
-  Plus, 
-  Trash2, 
-  Edit, 
-  Calendar as CalendarIcon,
-  Percent,
-  Tag,
-  Megaphone,
-  Zap,
-  Image,
-  Copy
+  Plus, Trash2, Edit, Calendar as CalendarIcon, Percent, Tag, Megaphone, Zap, Image, Copy, Loader2, Settings
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 
+interface Banner {
+  id: string;
+  name: string;
+  type: string;
+  image_url: string | null;
+  link_url: string | null;
+  title: string | null;
+  subtitle: string | null;
+  is_active: boolean;
+  store_type: string;
+  display_order: number;
+}
+
 interface Coupon {
   id: string;
   code: string;
-  type: 'percentage' | 'fixed' | 'free_shipping';
-  value: number;
-  minPurchase: number;
-  maxUses: number | null;
-  usesCount: number;
-  expiresAt: Date | null;
-  isActive: boolean;
+  discount_type: string;
+  discount_value: number;
+  min_purchase: number | null;
+  max_uses: number | null;
+  uses_count: number | null;
+  expires_at: string | null;
+  is_active: boolean | null;
 }
-
-interface FlashSale {
-  id: string;
-  title: string;
-  discount: number;
-  startDate: Date;
-  endDate: Date;
-  products: string[];
-  isActive: boolean;
-}
-
-const mockCoupons: Coupon[] = [
-  { id: '1', code: 'SUMMER20', type: 'percentage', value: 20, minPurchase: 50, maxUses: 100, usesCount: 45, expiresAt: new Date('2024-08-31'), isActive: true },
-  { id: '2', code: 'FREESHIP', type: 'free_shipping', value: 0, minPurchase: 75, maxUses: null, usesCount: 234, expiresAt: null, isActive: true },
-  { id: '3', code: 'FLASH50', type: 'fixed', value: 50, minPurchase: 200, maxUses: 50, usesCount: 50, expiresAt: new Date('2024-06-15'), isActive: false },
-];
-
-const mockFlashSales: FlashSale[] = [
-  { id: '1', title: 'Weekend Tech Sale', discount: 30, startDate: new Date(), endDate: new Date(Date.now() + 86400000 * 2), products: ['phone1', 'laptop1'], isActive: true },
-  { id: '2', title: 'Fashion Friday', discount: 25, startDate: new Date(Date.now() + 86400000 * 5), endDate: new Date(Date.now() + 86400000 * 6), products: ['shirt1', 'shoes1'], isActive: false },
-];
 
 export function MarketingAdmin() {
   const { toast } = useToast();
-  const [coupons, setCoupons] = useState<Coupon[]>(mockCoupons);
-  const [flashSales, setFlashSales] = useState<FlashSale[]>(mockFlashSales);
-  const [newCoupon, setNewCoupon] = useState<{
-    code: string;
-    type: 'percentage' | 'fixed' | 'free_shipping';
-    value: number;
-    minPurchase: number;
-    maxUses: number | null;
-    expiresAt: Date | null;
-  }>({
-    code: '',
-    type: 'percentage',
-    value: 10,
-    minPurchase: 0,
-    maxUses: null,
-    expiresAt: null,
+  const [banners, setBanners] = useState<Banner[]>([]);
+  const [coupons, setCoupons] = useState<Coupon[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [editingBanner, setEditingBanner] = useState<Banner | null>(null);
+  const [bannerDialogOpen, setBannerDialogOpen] = useState(false);
+  const [bannerForm, setBannerForm] = useState({
+    name: '',
+    type: 'hero',
+    image_url: '',
+    link_url: '',
+    title: '',
+    subtitle: '',
+    store_type: 'tech',
+    is_active: true
   });
 
+  const [newCoupon, setNewCoupon] = useState({
+    code: '',
+    discount_type: 'percentage',
+    discount_value: 10,
+    min_purchase: 0,
+    max_uses: null as number | null,
+    expires_at: null as Date | null,
+  });
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const [bannersRes, couponsRes] = await Promise.all([
+        supabase.from('banners').select('*').order('display_order'),
+        supabase.from('coupons').select('*').order('created_at', { ascending: false })
+      ]);
+
+      if (bannersRes.data) setBanners(bannersRes.data);
+      if (couponsRes.data) setCoupons(couponsRes.data);
+    } catch (error: any) {
+      toast({ variant: 'destructive', title: 'Error loading data', description: error.message });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Banner functions
+  const saveBanner = async () => {
+    try {
+      const data = {
+        name: bannerForm.name,
+        type: bannerForm.type,
+        image_url: bannerForm.image_url || null,
+        link_url: bannerForm.link_url || null,
+        title: bannerForm.title || null,
+        subtitle: bannerForm.subtitle || null,
+        store_type: bannerForm.store_type,
+        is_active: bannerForm.is_active
+      };
+
+      if (editingBanner) {
+        const { error } = await supabase.from('banners').update(data).eq('id', editingBanner.id);
+        if (error) throw error;
+        toast({ title: 'Banner updated' });
+      } else {
+        const { error } = await supabase.from('banners').insert([data]);
+        if (error) throw error;
+        toast({ title: 'Banner created' });
+      }
+
+      setBannerDialogOpen(false);
+      resetBannerForm();
+      fetchData();
+    } catch (error: any) {
+      toast({ variant: 'destructive', title: 'Error saving banner', description: error.message });
+    }
+  };
+
+  const deleteBanner = async (id: string) => {
+    if (!confirm('Delete this banner?')) return;
+    try {
+      const { error } = await supabase.from('banners').delete().eq('id', id);
+      if (error) throw error;
+      toast({ title: 'Banner deleted' });
+      fetchData();
+    } catch (error: any) {
+      toast({ variant: 'destructive', title: 'Error', description: error.message });
+    }
+  };
+
+  const editBanner = (banner: Banner) => {
+    setEditingBanner(banner);
+    setBannerForm({
+      name: banner.name,
+      type: banner.type,
+      image_url: banner.image_url || '',
+      link_url: banner.link_url || '',
+      title: banner.title || '',
+      subtitle: banner.subtitle || '',
+      store_type: banner.store_type,
+      is_active: banner.is_active
+    });
+    setBannerDialogOpen(true);
+  };
+
+  const resetBannerForm = () => {
+    setEditingBanner(null);
+    setBannerForm({
+      name: '', type: 'hero', image_url: '', link_url: '', title: '', subtitle: '', store_type: 'tech', is_active: true
+    });
+  };
+
+  // Coupon functions
   const generateCouponCode = () => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let code = '';
-    for (let i = 0; i < 8; i++) {
-      code += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
+    for (let i = 0; i < 8; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
     setNewCoupon({ ...newCoupon, code });
   };
 
-  const createCoupon = () => {
+  const createCoupon = async () => {
     if (!newCoupon.code) {
       toast({ title: 'Error', description: 'Please enter a coupon code', variant: 'destructive' });
       return;
     }
-    const coupon: Coupon = {
-      id: String(Date.now()),
-      ...newCoupon,
-      usesCount: 0,
-      isActive: true,
-    };
-    setCoupons([...coupons, coupon]);
-    setNewCoupon({ code: '', type: 'percentage', value: 10, minPurchase: 0, maxUses: null, expiresAt: null });
-    toast({ title: 'Coupon Created', description: `Coupon ${coupon.code} has been created.` });
+    try {
+      const { error } = await supabase.from('coupons').insert([{
+        code: newCoupon.code,
+        discount_type: newCoupon.discount_type,
+        discount_value: newCoupon.discount_value,
+        min_purchase: newCoupon.min_purchase || null,
+        max_uses: newCoupon.max_uses,
+        expires_at: newCoupon.expires_at?.toISOString() || null,
+        is_active: true
+      }]);
+      if (error) throw error;
+      toast({ title: 'Coupon Created', description: `Coupon ${newCoupon.code} has been created.` });
+      setNewCoupon({ code: '', discount_type: 'percentage', discount_value: 10, min_purchase: 0, max_uses: null, expires_at: null });
+      fetchData();
+    } catch (error: any) {
+      toast({ variant: 'destructive', title: 'Error', description: error.message });
+    }
   };
 
-  const toggleCoupon = (id: string) => {
-    setCoupons(coupons.map(c => c.id === id ? { ...c, isActive: !c.isActive } : c));
+  const toggleCoupon = async (id: string, isActive: boolean) => {
+    try {
+      const { error } = await supabase.from('coupons').update({ is_active: !isActive }).eq('id', id);
+      if (error) throw error;
+      fetchData();
+    } catch (error: any) {
+      toast({ variant: 'destructive', title: 'Error', description: error.message });
+    }
   };
 
-  const deleteCoupon = (id: string) => {
-    setCoupons(coupons.filter(c => c.id !== id));
-    toast({ title: 'Coupon Deleted', description: 'The coupon has been removed.' });
+  const deleteCoupon = async (id: string) => {
+    try {
+      const { error } = await supabase.from('coupons').delete().eq('id', id);
+      if (error) throw error;
+      toast({ title: 'Coupon Deleted' });
+      fetchData();
+    } catch (error: any) {
+      toast({ variant: 'destructive', title: 'Error', description: error.message });
+    }
   };
 
   const copyCouponCode = (code: string) => {
@@ -125,25 +216,195 @@ export function MarketingAdmin() {
     toast({ title: 'Copied!', description: `${code} copied to clipboard.` });
   };
 
+  const bannerTypes = [
+    { value: 'hero', label: 'Hero Banner' },
+    { value: 'category', label: 'Category Banner' },
+    { value: 'sidebar', label: 'Sidebar Ad' },
+    { value: 'footer', label: 'Footer Promo' },
+    { value: 'popup', label: 'Popup Ad' }
+  ];
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-3xl font-bold">Marketing & Promotions</h2>
-        <p className="text-muted-foreground">
-          Manage coupons, flash sales, banners, and promotional campaigns
-        </p>
+        <p className="text-muted-foreground">Manage coupons, flash sales, banners, and promotional campaigns</p>
       </div>
 
-      <Tabs defaultValue="coupons" className="space-y-4">
+      <Tabs defaultValue="banners" className="space-y-4">
         <TabsList>
+          <TabsTrigger value="banners">Banners & Ads</TabsTrigger>
           <TabsTrigger value="coupons">Coupon Codes</TabsTrigger>
           <TabsTrigger value="flash-sales">Flash Sales</TabsTrigger>
-          <TabsTrigger value="banners">Banners & Ads</TabsTrigger>
           <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
         </TabsList>
 
+        {/* Banners Tab */}
+        <TabsContent value="banners" className="space-y-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Image className="h-5 w-5" />
+                  Banner Management
+                </CardTitle>
+                <CardDescription>Manage promotional banners across the site</CardDescription>
+              </div>
+              <Dialog open={bannerDialogOpen} onOpenChange={(open) => {
+                setBannerDialogOpen(open);
+                if (!open) resetBannerForm();
+              }}>
+                <DialogTrigger asChild>
+                  <Button><Plus className="mr-2 h-4 w-4" />Add Banner</Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>{editingBanner ? 'Edit Banner' : 'Create Banner'}</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Banner Name *</Label>
+                        <Input
+                          value={bannerForm.name}
+                          onChange={(e) => setBannerForm({ ...bannerForm, name: e.target.value })}
+                          placeholder="Summer Sale Banner"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Banner Type</Label>
+                        <Select value={bannerForm.type} onValueChange={(v) => setBannerForm({ ...bannerForm, type: v })}>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            {bannerTypes.map(t => (
+                              <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Banner Image</Label>
+                      <ImageUpload
+                        value={bannerForm.image_url}
+                        onChange={(url) => setBannerForm({ ...bannerForm, image_url: url })}
+                        bucket="banners"
+                        folder={bannerForm.type}
+                        aspectRatio={bannerForm.type === 'hero' ? 'wide' : 'video'}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Title (optional)</Label>
+                        <Input
+                          value={bannerForm.title}
+                          onChange={(e) => setBannerForm({ ...bannerForm, title: e.target.value })}
+                          placeholder="Big Summer Sale"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Subtitle (optional)</Label>
+                        <Input
+                          value={bannerForm.subtitle}
+                          onChange={(e) => setBannerForm({ ...bannerForm, subtitle: e.target.value })}
+                          placeholder="Up to 50% off"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Link URL</Label>
+                        <Input
+                          value={bannerForm.link_url}
+                          onChange={(e) => setBannerForm({ ...bannerForm, link_url: e.target.value })}
+                          placeholder="/products?sale=true"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Store</Label>
+                        <Select value={bannerForm.store_type} onValueChange={(v) => setBannerForm({ ...bannerForm, store_type: v })}>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="tech">Tech Store</SelectItem>
+                            <SelectItem value="lifestyle">Lifestyle Store</SelectItem>
+                            <SelectItem value="all">All Stores</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={bannerForm.is_active}
+                        onCheckedChange={(checked) => setBannerForm({ ...bannerForm, is_active: checked })}
+                      />
+                      <Label>Active</Label>
+                    </div>
+
+                    <div className="flex justify-end gap-2">
+                      <Button variant="outline" onClick={() => setBannerDialogOpen(false)}>Cancel</Button>
+                      <Button onClick={saveBanner}>{editingBanner ? 'Update' : 'Create'} Banner</Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {banners.length === 0 ? (
+                  <div className="col-span-full text-center py-8 text-muted-foreground">
+                    No banners yet. Create your first banner to get started.
+                  </div>
+                ) : (
+                  banners.map((banner) => (
+                    <div key={banner.id} className="border rounded-lg overflow-hidden">
+                      <div className="aspect-video bg-muted relative">
+                        {banner.image_url ? (
+                          <img src={banner.image_url} alt={banner.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Image className="h-12 w-12 text-muted-foreground/50" />
+                          </div>
+                        )}
+                        <Badge className="absolute top-2 left-2" variant={banner.is_active ? 'default' : 'secondary'}>
+                          {banner.is_active ? 'Active' : 'Inactive'}
+                        </Badge>
+                      </div>
+                      <div className="p-3 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-medium truncate">{banner.name}</h4>
+                          <Badge variant="outline" className="capitalize text-xs">{banner.type}</Badge>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button size="sm" variant="outline" onClick={() => editBanner(banner)}>
+                            <Edit className="h-3 w-3 mr-1" />Edit
+                          </Button>
+                          <Button size="sm" variant="destructive" onClick={() => deleteBanner(banner.id)}>
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Coupons Tab */}
         <TabsContent value="coupons" className="space-y-4">
-          {/* Create Coupon */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -169,14 +430,10 @@ export function MarketingAdmin() {
                 <div className="space-y-2">
                   <Label>Discount Type</Label>
                   <Select
-                    value={newCoupon.type}
-                    onValueChange={(v: 'percentage' | 'fixed' | 'free_shipping') => 
-                      setNewCoupon({ ...newCoupon, type: v })
-                    }
+                    value={newCoupon.discount_type}
+                    onValueChange={(v) => setNewCoupon({ ...newCoupon, discount_type: v })}
                   >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="percentage">Percentage Off</SelectItem>
                       <SelectItem value="fixed">Fixed Amount</SelectItem>
@@ -184,30 +441,30 @@ export function MarketingAdmin() {
                     </SelectContent>
                   </Select>
                 </div>
-                {newCoupon.type !== 'free_shipping' && (
+                {newCoupon.discount_type !== 'free_shipping' && (
                   <div className="space-y-2">
-                    <Label>Value {newCoupon.type === 'percentage' ? '(%)' : '($)'}</Label>
+                    <Label>Value {newCoupon.discount_type === 'percentage' ? '(%)' : '(KSh)'}</Label>
                     <Input
                       type="number"
-                      value={newCoupon.value}
-                      onChange={(e) => setNewCoupon({ ...newCoupon, value: Number(e.target.value) })}
+                      value={newCoupon.discount_value}
+                      onChange={(e) => setNewCoupon({ ...newCoupon, discount_value: Number(e.target.value) })}
                     />
                   </div>
                 )}
                 <div className="space-y-2">
-                  <Label>Minimum Purchase ($)</Label>
+                  <Label>Minimum Purchase (KSh)</Label>
                   <Input
                     type="number"
-                    value={newCoupon.minPurchase}
-                    onChange={(e) => setNewCoupon({ ...newCoupon, minPurchase: Number(e.target.value) })}
+                    value={newCoupon.min_purchase}
+                    onChange={(e) => setNewCoupon({ ...newCoupon, min_purchase: Number(e.target.value) })}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>Max Uses (leave empty for unlimited)</Label>
                   <Input
                     type="number"
-                    value={newCoupon.maxUses || ''}
-                    onChange={(e) => setNewCoupon({ ...newCoupon, maxUses: e.target.value ? Number(e.target.value) : null })}
+                    value={newCoupon.max_uses || ''}
+                    onChange={(e) => setNewCoupon({ ...newCoupon, max_uses: e.target.value ? Number(e.target.value) : null })}
                   />
                 </div>
                 <div className="space-y-2">
@@ -216,14 +473,14 @@ export function MarketingAdmin() {
                     <PopoverTrigger asChild>
                       <Button variant="outline" className="w-full justify-start">
                         <CalendarIcon className="mr-2 h-4 w-4" />
-                        {newCoupon.expiresAt ? format(newCoupon.expiresAt, 'PPP') : 'No expiry'}
+                        {newCoupon.expires_at ? format(newCoupon.expires_at, 'PPP') : 'No expiry'}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
                       <Calendar
                         mode="single"
-                        selected={newCoupon.expiresAt || undefined}
-                        onSelect={(date) => setNewCoupon({ ...newCoupon, expiresAt: date || null })}
+                        selected={newCoupon.expires_at || undefined}
+                        onSelect={(date) => setNewCoupon({ ...newCoupon, expires_at: date || null })}
                       />
                     </PopoverContent>
                   </Popover>
@@ -236,11 +493,8 @@ export function MarketingAdmin() {
             </CardContent>
           </Card>
 
-          {/* Coupons Table */}
           <Card>
-            <CardHeader>
-              <CardTitle>Active Coupons</CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle>Active Coupons</CardTitle></CardHeader>
             <CardContent>
               <Table>
                 <TableHeader>
@@ -266,35 +520,30 @@ export function MarketingAdmin() {
                           </Button>
                         </div>
                       </TableCell>
-                      <TableCell className="capitalize">{coupon.type.replace('_', ' ')}</TableCell>
+                      <TableCell className="capitalize">{coupon.discount_type.replace('_', ' ')}</TableCell>
                       <TableCell>
-                        {coupon.type === 'percentage' ? `${coupon.value}%` :
-                         coupon.type === 'fixed' ? `$${coupon.value}` : '-'}
+                        {coupon.discount_type === 'percentage' ? `${coupon.discount_value}%` :
+                         coupon.discount_type === 'fixed' ? `KSh ${coupon.discount_value}` : '-'}
                       </TableCell>
-                      <TableCell>${coupon.minPurchase}</TableCell>
+                      <TableCell>KSh {coupon.min_purchase || 0}</TableCell>
                       <TableCell>
-                        {coupon.usesCount}{coupon.maxUses ? `/${coupon.maxUses}` : ''}
-                      </TableCell>
-                      <TableCell>
-                        {coupon.expiresAt ? format(coupon.expiresAt, 'PP') : 'Never'}
+                        {coupon.uses_count || 0}{coupon.max_uses ? `/${coupon.max_uses}` : ''}
                       </TableCell>
                       <TableCell>
-                        <Badge variant={coupon.isActive ? 'default' : 'secondary'}>
-                          {coupon.isActive ? 'Active' : 'Inactive'}
+                        {coupon.expires_at ? format(new Date(coupon.expires_at), 'PP') : 'Never'}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={coupon.is_active ? 'default' : 'secondary'}>
+                          {coupon.is_active ? 'Active' : 'Inactive'}
                         </Badge>
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-2">
                           <Switch
-                            checked={coupon.isActive}
-                            onCheckedChange={() => toggleCoupon(coupon.id)}
+                            checked={coupon.is_active || false}
+                            onCheckedChange={() => toggleCoupon(coupon.id, coupon.is_active || false)}
                           />
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="text-destructive"
-                            onClick={() => deleteCoupon(coupon.id)}
-                          >
+                          <Button variant="ghost" size="icon" className="text-destructive" onClick={() => deleteCoupon(coupon.id)}>
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
@@ -314,74 +563,13 @@ export function MarketingAdmin() {
                 <Zap className="h-5 w-5" />
                 Flash Sales Schedule
               </CardTitle>
-              <CardDescription>
-                Create time-limited sales events
-              </CardDescription>
+              <CardDescription>Create time-limited sales events</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {flashSales.map((sale) => (
-                  <div key={sale.id} className="border rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <div>
-                        <h4 className="font-semibold">{sale.title}</h4>
-                        <p className="text-sm text-muted-foreground">
-                          {format(sale.startDate, 'PPP')} - {format(sale.endDate, 'PPP')}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <Badge variant={sale.isActive ? 'default' : 'secondary'}>
-                          {sale.isActive ? 'Active' : 'Scheduled'}
-                        </Badge>
-                        <Badge variant="outline">{sale.discount}% OFF</Badge>
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm">
-                        <Edit className="h-4 w-4 mr-2" />
-                        Edit
-                      </Button>
-                      <Button variant="outline" size="sm" className="text-destructive">
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-                <Button variant="outline" className="w-full">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Flash Sale
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="banners" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Image className="h-5 w-5" />
-                Banner Management
-              </CardTitle>
-              <CardDescription>
-                Manage promotional banners across the site
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {['Hero Banner', 'Category Banner', 'Sidebar Ad', 'Footer Promo'].map((banner) => (
-                  <div key={banner} className="border rounded-lg p-4">
-                    <div className="h-32 bg-muted rounded-lg mb-3 flex items-center justify-center">
-                      <Image className="h-8 w-8 text-muted-foreground" />
-                    </div>
-                    <h4 className="font-medium">{banner}</h4>
-                    <div className="flex gap-2 mt-2">
-                      <Button variant="outline" size="sm">Upload Image</Button>
-                      <Button variant="outline" size="sm">Settings</Button>
-                    </div>
-                  </div>
-                ))}
+              <div className="text-center py-8 text-muted-foreground">
+                <Zap className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>Flash sales are managed through product settings.</p>
+                <p className="text-sm">Enable "Flash Sale" on individual products in Product Management.</p>
               </div>
             </CardContent>
           </Card>
@@ -394,39 +582,13 @@ export function MarketingAdmin() {
                 <Megaphone className="h-5 w-5" />
                 Marketing Campaigns
               </CardTitle>
-              <CardDescription>
-                Create and manage email & promotional campaigns
-              </CardDescription>
+              <CardDescription>Create and manage email & promotional campaigns</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div className="border rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-semibold">Summer Collection Launch</h4>
-                    <Badge>Running</Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Email + Push notification campaign for new summer arrivals
-                  </p>
-                  <div className="grid grid-cols-3 gap-4 text-sm">
-                    <div>
-                      <p className="text-muted-foreground">Sent</p>
-                      <p className="font-semibold">12,458</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">Open Rate</p>
-                      <p className="font-semibold">24.5%</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">Click Rate</p>
-                      <p className="font-semibold">8.2%</p>
-                    </div>
-                  </div>
-                </div>
-                <Button variant="outline" className="w-full">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Campaign
-                </Button>
+              <div className="text-center py-8 text-muted-foreground">
+                <Megaphone className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>Campaign management coming soon.</p>
+                <p className="text-sm">Email and push notification campaigns will be available in a future update.</p>
               </div>
             </CardContent>
           </Card>
