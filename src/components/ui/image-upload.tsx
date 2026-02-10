@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 interface ImageUploadProps {
   value?: string;
   onChange: (url: string) => void;
-  bucket: 'banners' | 'products';
+  bucket: 'banners' | 'products' | 'categories';
   folder?: string;
   className?: string;
   aspectRatio?: 'square' | 'video' | 'wide';
@@ -164,7 +164,7 @@ export function ImageUpload({
 interface MultiImageUploadProps {
   value: string[];
   onChange: (urls: string[]) => void;
-  bucket: 'banners' | 'products';
+  bucket: 'banners' | 'products' | 'categories';
   folder?: string;
   maxImages?: number;
   className?: string;

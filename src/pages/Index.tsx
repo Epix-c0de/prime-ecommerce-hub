@@ -14,6 +14,7 @@ import { useCart } from "@/hooks/useCart";
 import { Product } from "@/hooks/useProducts";
 import { useRealtimeSync } from "@/hooks/useRealtimeSync";
 import { techHomepageConfig } from "@/config/homepageConfig";
+import { AdOverlayBanners } from "@/components/homepage/AdOverlayBanners";
 
 // Homepage Components
 import {
@@ -105,6 +106,8 @@ const Index = () => {
         {/* Promotional Banners */}
         <PromotionalBanners banners={promoBanners} />
 
+        {/* Ad Overlay Banners from Marketing Admin */}
+        <AdOverlayBanners storeType="tech" />
         {/* Best Sellers & Trending Carousels */}
         {config.productCarousels.filter(c => c.type === 'best-sellers' || c.type === 'trending').map(carousel => (
           <ProductCarouselSection
