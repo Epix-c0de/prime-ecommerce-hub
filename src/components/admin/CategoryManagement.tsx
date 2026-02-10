@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { ImageUpload } from '@/components/ui/image-upload';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Edit, Trash2, Folder, Loader2 } from 'lucide-react';
 
@@ -214,13 +215,14 @@ export function CategoryManagement() {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="image_url">Image URL</Label>
-                <Input
-                  id="image_url"
+               <div className="space-y-2">
+                <Label htmlFor="image_url">Category Image</Label>
+                <ImageUpload
                   value={formData.image_url}
-                  onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                  placeholder="https://example.com/category-image.jpg"
+                  onChange={(url) => setFormData({ ...formData, image_url: url })}
+                  bucket="categories"
+                  folder={formData.store_type}
+                  aspectRatio="video"
                 />
               </div>
 
